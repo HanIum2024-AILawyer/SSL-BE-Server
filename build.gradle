@@ -42,13 +42,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	// DB
-	annotationProcessor 'org.projectlombok:lombok' // 초반 엔티티 설계 후 PostgreSQL로 변경 예정
+	runtimeOnly 'com.h2database:h2' // 초반 엔티티 설계 후 PostgreSQL로 변경 예정
 
 	// JPA
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	// Utils
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// Test
