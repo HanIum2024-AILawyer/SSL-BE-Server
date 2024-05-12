@@ -1,7 +1,7 @@
 package com.lawProject.SSL.domain.comment.model;
 
 import com.lawProject.SSL.common.model.BaseEntity;
-import com.lawProject.SSL.domain.inQuery.model.InQuery;
+import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -26,6 +26,6 @@ public class Comment extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "inQuery_id")
+    @JoinColumn(name = "inquery_id")
     private InQuery inQuery;
 }

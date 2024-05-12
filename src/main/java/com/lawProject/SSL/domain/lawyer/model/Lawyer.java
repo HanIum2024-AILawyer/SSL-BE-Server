@@ -1,4 +1,4 @@
-package com.lawProject.SSL.domain.Lawyer.model;
+package com.lawProject.SSL.domain.lawyer.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

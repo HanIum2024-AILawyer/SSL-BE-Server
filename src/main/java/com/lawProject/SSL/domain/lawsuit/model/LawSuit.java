@@ -1,4 +1,4 @@
-package com.lawProject.SSL.domain.lawSuit.model;
+package com.lawProject.SSL.domain.lawsuit.model;
 
 import com.lawProject.SSL.common.model.BaseEntity;
 import com.lawProject.SSL.domain.user.model.User;
@@ -17,7 +17,7 @@ import static jakarta.persistence.FetchType.LAZY;
 public class LawSuit extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lawSuit_id")
+    @Column(name = "law_suit_id")
     private Long id;
 
     private String fileUrl;

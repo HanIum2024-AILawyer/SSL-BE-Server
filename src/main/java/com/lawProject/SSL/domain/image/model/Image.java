@@ -1,8 +1,7 @@
 package com.lawProject.SSL.domain.image.model;
 
-import com.lawProject.SSL.domain.Lawyer.model.Lawyer;
+import com.lawProject.SSL.domain.lawyer.model.Lawyer;
 import com.lawProject.SSL.domain.notification.model.Notification;
-import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
