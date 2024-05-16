@@ -1,4 +1,4 @@
-package com.lawProject.SSL.config.swagger;
+package com.lawProject.SSL.global.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static com.lawProject.SSL.common.constant.SwaggerConstants.*;
 
 @OpenAPIDefinition(info = @Info(title = DEFINITION_TITLE, description = DEFINITION_DESCRIPTION, version = DEFINITION_VERSION))
 @SecurityScheme(

@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.notification.model;
 
-import com.lawProject.SSL.common.model.BaseEntity;
+import com.lawProject.SSL.domain.model.BaseEntity;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package com.lawProject.SSL.common.model;
+package com.lawProject.SSL.domain.model;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.comment.model;
 
-import com.lawProject.SSL.common.model.BaseEntity;
+import com.lawProject.SSL.domain.model.BaseEntity;
 import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;

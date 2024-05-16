@@ -1,4 +1,6 @@
-package com.lawProject.SSL.common.Error.exception;
+package com.lawProject.SSL.global.error.exception;
+
+import com.lawProject.SSL.global.error.ErrorCode;
 
 public class EntityNotFoundException extends BusinessException{
 

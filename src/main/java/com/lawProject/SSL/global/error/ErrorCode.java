@@ -1,4 +1,4 @@
-package com.lawProject.SSL.common.Error.exception;
+package com.lawProject.SSL.global.error;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

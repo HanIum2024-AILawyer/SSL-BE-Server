@@ -1,6 +1,5 @@
-package com.lawProject.SSL.common.Error;
+package com.lawProject.SSL.global.error;
 
-import com.lawProject.SSL.common.Error.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

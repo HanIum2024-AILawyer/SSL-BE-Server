@@ -1,4 +1,4 @@
-package com.lawProject.SSL.common.dto;
+package com.lawProject.SSL.global.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
