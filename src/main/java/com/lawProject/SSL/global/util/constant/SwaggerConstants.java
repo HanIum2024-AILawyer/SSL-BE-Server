@@ -7,7 +7,7 @@ public class SwaggerConstants {
     public static final String[] SWAGGER_APPOINTED_PATHS = {
             "/**"
     };
-    public static final String DEFINITION_TITLE = "Vacation Projdct API 명세서";
+    public static final String DEFINITION_TITLE = "AI Lawyer Project API 명세서";
     public static final String DEFINITION_DESCRIPTION = "\uD83D\uDE80 Realtime Congestion Based Location Recommendation Service - SSL Server의 API 명세서입니다.";
     public static final String DEFINITION_VERSION = "v1";
 
@@ -22,9 +22,6 @@ public class SwaggerConstants {
     public static final String PAGING = "pageable";
     public static final String PAGING_DESCRIPTION = "";
 
-    public static final String SORT_KEY = "sortKey";
-    public static final String SORT_KEY_DESCRIPTION = "최신순(기본값): createdAt, 인기순: popular, 고가순: highPrice, 저가순: lowestPrice";
-
     /**
      * Home
      */
@@ -32,6 +29,5 @@ public class SwaggerConstants {
     public static final String TAG_HOME_DESCRIPTION = "Home API";
     public static final String HOME_SUMMARY = "메인 페이지";
     public static final String HOME_DESCRIPTION = "메인 페이지 정보를 가져옵니다.";
-
 
 }
