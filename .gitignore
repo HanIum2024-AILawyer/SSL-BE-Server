@@ -6,10 +6,10 @@ build/
 !**/src/test/**/build/
 
 # application.properties 파일 무시
-src/main/resources/application.properties
+application.properties
 
 # application.properties 파일 무시
-src/main/resources/application.yml
+application.yml
 
 ### STS ###
 .apt_generated
