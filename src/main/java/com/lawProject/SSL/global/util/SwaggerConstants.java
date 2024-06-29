@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.util.constant;
+package com.lawProject.SSL.global.util;
 
 public class SwaggerConstants {
     /**

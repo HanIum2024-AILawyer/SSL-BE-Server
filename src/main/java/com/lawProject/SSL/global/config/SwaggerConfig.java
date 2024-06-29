@@ -8,7 +8,7 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.lawProject.SSL.global.util.constant.SwaggerConstants.*;
+import static com.lawProject.SSL.global.util.SwaggerConstants.*;
 
 @OpenAPIDefinition(info = @Info(title = DEFINITION_TITLE, description = DEFINITION_DESCRIPTION, version = DEFINITION_VERSION))
 @SecurityScheme(
