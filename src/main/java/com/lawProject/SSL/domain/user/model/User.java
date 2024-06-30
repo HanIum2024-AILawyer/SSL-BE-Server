@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.user.model;
 
-import com.lawProject.SSL.domain.model.BaseEntity;
+import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-import static com.lawProject.SSL.domain.user.model.UserRole.*;
+import static com.lawProject.SSL.domain.user.model.UserRole.USER;
 
 @Getter
 @Entity

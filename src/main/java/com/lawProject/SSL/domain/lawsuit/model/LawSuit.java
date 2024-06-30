@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.lawsuit.model;
 
-import com.lawProject.SSL.domain.model.BaseEntity;
+import com.lawProject.SSL.global.common.dao.BaseEntity;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
