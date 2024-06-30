@@ -31,8 +31,15 @@ public enum ErrorCode {
     NICKNAME_DUPLICATION(409, "U001", "중복되는 닉네임입니다."),
     USER_NOT_FOUND(404, "U002", "존재하지 않는 회원입니다."),
     INVALID_INPUT_ID_PASSWORD(400, "U003", "Id 또는 Password가 일치하지 않습니다."),
-    SOCIAL_TYPE_ERROR(400,"2040","invalid social type error.");
+    SOCIAL_TYPE_ERROR(400,"2040","invalid social type error."),
 
+    /**
+     * Token
+     */
+    INVALID_TOKEN(401, "T001", "유효하지 않은 토큰입니다."),
+    INVALID_ACCESS_TOKEN(401, "T002", "유효하지 않은 액세스 토큰입니다."),
+    INVALID_REFRESH_TOKEN(401, "T003", "유효하지 않은 리프레쉬 토큰입니다."),
+    REFRESH_TOKEN_NOT_FOUND(404, "T004", "해당 유저 ID의 리프레쉬 토큰이 없습니다.");
 
 
     private final String code;

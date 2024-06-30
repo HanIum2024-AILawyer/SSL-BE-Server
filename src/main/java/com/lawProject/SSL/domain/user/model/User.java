@@ -4,6 +4,7 @@ import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,6 +37,14 @@ public class User extends BaseEntity {
     @NotNull
     private UserRole role = USER;
 
-//    private UserStatus userStatus;
+    @Builder
+    public User(UUID userId, String name, String provider, String providerId) {
+        this.userId = userId;
+        this.name = name;
+        this.provider = provider;
+        this.providerId = providerId;
+    }
+
+    //    private UserStatus userStatus;
 
 }
