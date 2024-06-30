@@ -31,7 +31,8 @@ public enum ErrorCode {
     NICKNAME_DUPLICATION(409, "U001", "중복되는 닉네임입니다."),
     USER_NOT_FOUND(404, "U002", "존재하지 않는 회원입니다."),
     INVALID_INPUT_ID_PASSWORD(400, "U003", "Id 또는 Password가 일치하지 않습니다."),
-    SOCIAL_TYPE_ERROR(400,"2040","invalid social type error."),
+    SOCIAL_TYPE_ERROR(400,"U004","invalid social type error."),
+    USER_INQUIRY_FAILED(401, "U005", "회원 조회 실패"),
 
     /**
      * Token
