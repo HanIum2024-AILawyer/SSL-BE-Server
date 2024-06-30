@@ -1,7 +1,10 @@
-package com.lawProject.SSL.global.jwt.info;
+package com.lawProject.SSL.global.security.oauth.info;
+
+import lombok.AllArgsConstructor;
 
 import java.util.Map;
 
+@AllArgsConstructor
 public class KaKaoUserInfo implements OAuth2UserInfo{
     private Map<String, Object> attributes;
 
