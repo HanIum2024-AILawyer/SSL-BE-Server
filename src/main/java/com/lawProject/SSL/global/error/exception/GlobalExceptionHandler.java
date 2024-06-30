@@ -1,21 +1,28 @@
-package com.lawProject.SSL.global.error;
+package com.lawProject.SSL.global.error.exception;
 
-import com.lawProject.SSL.global.error.exception.BusinessException;
+import com.lawProject.SSL.domain.user.exception.UserException;
+import com.lawProject.SSL.global.common.response.ApiResponse;
+import com.lawProject.SSL.global.error.ErrorCode;
+import com.lawProject.SSL.global.error.ErrorResponse;
+import com.lawProject.SSL.global.jwt.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.nio.file.AccessDeniedException;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
     /**
      * javax.validation.Valid or @Validated 으로 binding error 발생시 발생한다.
      * HttpMessageConverter 에서 등록한 HttpMessageConverter binding 못할경우 발생
@@ -54,36 +61,58 @@ public class GlobalExceptionHandler {
      * 지원하지 않은 HTTP method 호출 할 경우 발생
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    protected ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    protected ResponseEntity<ApiResponse<ErrorCode>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.error("handleHttpRequestMethodNotSupportedException", e);
-        final ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED);
-        return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
+        return ApiResponse.onFailure(ErrorCode.METHOD_NOT_ALLOWED);
+
     }
 
     /**
      * Authentication 객체가 필요한 권한을 보유하지 않은 경우 발생합
      */
     @ExceptionHandler(AccessDeniedException.class)
-    protected ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+    protected ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException e) {
         log.error("handleAccessDeniedException", e);
-        final ErrorResponse response = ErrorResponse.of(ErrorCode.HANDLE_ACCESS_DENIED);
-        return new ResponseEntity<>(response, HttpStatus.valueOf(ErrorCode.HANDLE_ACCESS_DENIED.getStatus()));
+        return ApiResponse.onFailure(ErrorCode.HANDLE_ACCESS_DENIED);
     }
 
+    /**
+     * Header
+     */
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<String> handleMissingHeaderException(MissingRequestHeaderException ex) {
+        String errorMessage = "Required header '" + ex.getHeaderName() + "' is missing";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
+    }
+
+    /**
+     * BusinessException
+     */
     @ExceptionHandler(BusinessException.class)
-    protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
+    protected ResponseEntity<ApiResponse<ErrorCode>> handleBusinessException(final BusinessException e) {
         log.error("handleEntityNotFoundException", e);
-        final ErrorCode errorCode = e.getErrorCode();
-        final ErrorResponse response = ErrorResponse.of(errorCode);
-        return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
+        ErrorCode errorCode = e.getErrorCode();
+        return ApiResponse.onFailure(errorCode);
     }
 
+    /**
+     * Token
+     */
+    @ExceptionHandler(TokenException.class)
+    protected ResponseEntity<ApiResponse<ErrorCode>> handleTokenException(final TokenException e) {
+        log.error("handleTokenException", e);
+        ErrorCode errorCode = e.getErrorCode();
+        return ApiResponse.onFailure(errorCode);
+    }
 
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("handleEntityNotFoundException", e);
-        final ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    /**
+     * User
+     */
+    @ExceptionHandler(UserException.class)
+    protected ResponseEntity<ApiResponse<ErrorCode>> handleUserException(final UserException e) {
+        log.error("handleTokenException", e);
+        ErrorCode errorCode = e.getErrorCode();
+        return ApiResponse.onFailure(errorCode);
     }
 }
 

@@ -1,55 +1,34 @@
 package com.lawProject.SSL.global.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AccessLevel;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.lawProject.SSL.global.error.ErrorCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.util.HashMap;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@RequiredArgsConstructor
 public class ApiResponse<T> {
+    @JsonProperty("is_success")
+    private final Boolean isSuccess;
+    private final String code;
+    private final String message;
 
-    private static final String SUCCESS_STATUS = "success";
-
-    private Integer statusCode;
-    private String status;
-    private T data;
-    private String message;
-
-
-    public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(SUCCESS_STATUS, data);
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final T payload;
+    public static <T> ResponseEntity<ApiResponse<T>> onSuccess(ErrorCode code, T payload) {
+        ApiResponse<T> response = new ApiResponse<>(true, code.getCode(), code.getMessage(), payload);
+        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
-    public static <T> ApiResponse<T> successWithNoContent() {
-        return new ApiResponse<>(SUCCESS_STATUS, null);
+    public static <T> ResponseEntity<ApiResponse<T>> onSuccess(ErrorCode code) {
+        ApiResponse<T> response = new ApiResponse<>(true, code.getCode(), code.getMessage(), null);
+        return ResponseEntity.status(code.getStatus()).body(response);
     }
 
-    public static ApiResponse error(int errorCode, String message) {
-        HashMap<String, String> empty = new HashMap<>();
-        return new ApiResponse<>(errorCode, empty, message);
-    }
-
-    public static <T> ApiResponse<T> error(int errorCode, T data, String message) {
-        return new ApiResponse<>(errorCode, data, message);
-    }
-
-    private ApiResponse(String status, T data) {
-        this.status = status;
-        this.data = data;
-    }
-
-    private ApiResponse(int status, T data) {
-        this.statusCode = null;
-        this.data = data;
-    }
-
-    private ApiResponse(int status, T data, String message) {
-        this.statusCode = status;
-        this.data = data;
-        this.message = message;
+    public static <T> ResponseEntity<ApiResponse<T>> onFailure(ErrorCode code) {
+        ApiResponse<T> response = new ApiResponse<>(false, code.getCode(), code.getMessage(), null);
+        return ResponseEntity.status(code.getStatus()).body(response);
     }
 }
