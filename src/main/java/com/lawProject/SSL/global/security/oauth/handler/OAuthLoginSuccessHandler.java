@@ -110,5 +110,4 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
 
     }
-
 }

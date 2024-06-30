@@ -12,6 +12,7 @@ import static jakarta.persistence.FetchType.*;
 
 @Getter
 @Entity
+@Table(name="notification")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseEntity {
     @Id
