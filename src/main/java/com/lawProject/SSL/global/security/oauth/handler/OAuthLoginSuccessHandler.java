@@ -2,6 +2,8 @@ package com.lawProject.SSL.global.security.oauth.handler;
 
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.jwt.model.RefreshToken;
+import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
 import com.lawProject.SSL.global.jwt.service.JwtService;
 import com.lawProject.SSL.global.security.oauth.info.GoogleUserInfo;
 import com.lawProject.SSL.global.security.oauth.info.KaKaoUserInfo;
@@ -39,7 +41,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 //    private final JwtUtil jwtUtil;
     private final JwtService jwtService;
     private final UserRepository userRepository;
-//    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -84,39 +86,29 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         } else {
             // 기존 유저인 경우
             log.info("기존 유저입니다.");
-//            refreshTokenRepository.deleteByUserId(existUser.getUserId());
+            refreshTokenRepository.deleteByUserId(existUser.getUserId());
             user = existUser;
         }
-
-        String accessToken = jwtService.createAccessToken(user.getUserId());
-        String refreshtoken = jwtService.createRefreshToken();
-
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshtoken);
-
-        user.updateRefreshToken(refreshtoken);
 
         log.info("유저 이름 : {}", name);
         log.info("PROVIDER : {}", provider);
         log.info("PROVIDER_ID : {}", providerId);
 
-//        log.info("AccessToken을 발급합니다. AccessToken: {}", accessToken);
-//        log.info("RefreshToken을 발급합니다. RefreshToken: {}", refreshtoken);
+        // Refresh Token 발급 후 저장
+        String refreshtoken = jwtService.createRefreshToken(user.getUserId());
 
-//        // 리프레쉬 토큰 발급 후 저장
-//        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId(), REFRESH_TOKEN_EXPIRATION_TIME);
-//        RefreshToken newRefreshToken = RefreshToken.builder()
-//                .userId(user.getUserId())
-//                .token(refreshToken)
-//                .build();
-//        refreshTokenRepository.save(newRefreshToken);
-//
-//        //액세스 토큰 발급
-//        String accessToken = jwtUtil.generateAccessToken(user.getUserId(), ACCESS_TOKEN_EXPIRATION_TIME);
-//
-//        //이름, 액세스 토큰, 리프레쉬 토큰을 담아 리다이렉트
-//        String encodedName = URLEncoder.encode(name, "UTF-8");
-//        String redirectUri = String.format(REDIRECT_URI, encodedName, accessToken, refreshToken);
-//        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .userId(user.getUserId())
+                .token(refreshtoken)
+                .build();
 
+        refreshTokenRepository.save(newRefreshToken);
+
+        // Access Token 발급
+        String accessToken = jwtService.createAccessToken(user.getUserId());
+
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshtoken);
+
+//        user.updateRefreshToken(refreshtoken);
     }
 }

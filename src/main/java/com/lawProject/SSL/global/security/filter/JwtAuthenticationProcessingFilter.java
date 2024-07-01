@@ -2,6 +2,7 @@ package com.lawProject.SSL.global.security.filter;
 
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
 import com.lawProject.SSL.global.jwt.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -63,7 +65,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 accessToken -> jwtService.extractUserId(accessToken).ifPresent(
 
                         userId -> userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
-
                                 user -> saveAuthentication(user)
                         )
                 )
@@ -89,8 +90,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-        userRepository.findByRefreshToken(refreshToken).ifPresent(
-                user -> jwtService.sendAccessToken(response, jwtService.createAccessToken(user.getUserId()))
+//        userRepository.findByRefreshToken(refreshToken).ifPresent(
+//                user -> jwtService.sendAccessToken(response, jwtService.createAccessToken(user.getUserId()))
+//        );
+
+        jwtService.extractRefreshTokenUserId(refreshToken).ifPresent(
+                userId -> userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
+                        user -> jwtService.sendAccessToken(response, jwtService.createAccessToken(user.getUserId()))
+                )
         );
 
 

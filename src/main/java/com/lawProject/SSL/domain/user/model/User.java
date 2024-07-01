@@ -33,7 +33,7 @@ public class User extends BaseEntity {
 
     @Column(name = "provider_id", nullable = false, length = 50)
     private String providerId; // 카카오에서 이메일을 받을 수 없기 때문에, 로그인 시 providerId를 추출하여 각 유저를 구분한다.
-    private String refreshToken;
+//    private String refreshToken;
 
     @NotNull
     private UserRole role = USER;
@@ -47,13 +47,13 @@ public class User extends BaseEntity {
     }
 
     //    private UserStatus userStatus;
-    /*Using Method*/
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void destroyRefreshToken() {
-        this.refreshToken = null;
-    }
+//    /*Using Method*/
+//    public void updateRefreshToken(String refreshToken) {
+//        this.refreshToken = refreshToken;
+//    }
+//
+//    public void destroyRefreshToken() {
+//        this.refreshToken = null;
+//    }
 
 }

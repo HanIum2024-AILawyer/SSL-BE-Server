@@ -2,6 +2,7 @@ package com.lawProject.SSL.global.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
 import com.lawProject.SSL.global.jwt.service.JwtService;
 import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
 import com.lawProject.SSL.global.security.oauth.handler.OAuthLoginFailureHandler;
@@ -27,6 +28,7 @@ import java.util.Collections;
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
@@ -77,9 +79,8 @@ public class SecurityConfig {
     }
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
-        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
 
-        return jsonUsernamePasswordLoginFilter;
+        return new JwtAuthenticationProcessingFilter(jwtService, userRepository, refreshTokenRepository);
     }
 }
 
