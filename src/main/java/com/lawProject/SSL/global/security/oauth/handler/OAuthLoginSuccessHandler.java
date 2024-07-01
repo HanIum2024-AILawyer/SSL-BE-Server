@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${jwt.redirect}")
     private String REDIRECT_URI; // 프론트엔드로 Jwt 토큰을 리다이렉트할 URI
 
@@ -60,6 +60,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
                 log.info("네이버 로그인 요청");
                 oAuth2UserInfo = new NaverUserInfo(token.getPrincipal().getAttributes());
             }
+            default -> throw new IllegalArgumentException("지원하지 않는 로그인 제공자입니다: " + provider);
         }
 
         // 정보 추출
@@ -98,8 +99,8 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         log.info("PROVIDER : {}", provider);
         log.info("PROVIDER_ID : {}", providerId);
 
-        log.info("AccessToken을 발급합니다. AccessToken: {}", accessToken);
-        log.info("RefreshToken을 발급합니다. RefreshToken: {}", refreshtoken);
+//        log.info("AccessToken을 발급합니다. AccessToken: {}", accessToken);
+//        log.info("RefreshToken을 발급합니다. RefreshToken: {}", refreshtoken);
 
 //        // 리프레쉬 토큰 발급 후 저장
 //        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId(), REFRESH_TOKEN_EXPIRATION_TIME);
