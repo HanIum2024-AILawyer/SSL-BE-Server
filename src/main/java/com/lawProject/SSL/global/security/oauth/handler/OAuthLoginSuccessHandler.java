@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${jwt.redirect}")
-    private String REDIRECT_URI; // 프론트엔드로 Jwt 토큰을 리다이렉트할 URI
+    private String REDIRECT_URI; // 로그인 과정이 끝난 후 리다이렉트 되는 URI
 
     @Value("${jwt.access-token.expiration-time}")
     private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
@@ -36,12 +38,11 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${jwt.refresh-token.expiration-time}")
     private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
 
-    private OAuth2UserInfo oAuth2UserInfo = null;
-
 //    private final JwtUtil jwtUtil;
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -49,21 +50,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         final String provider = token.getAuthorizedClientRegistrationId();// provider
 
         // 구글, 카카오, 네이버 로그인 요청
-        switch (provider) {
-            case "google" -> {
-                log.info("구글 로그인 요청");
-                oAuth2UserInfo = new GoogleUserInfo(token.getPrincipal().getAttributes());
-            }
-            case "kakao" -> {
-                log.info("카카오 로그인 요청");
-                oAuth2UserInfo = new KaKaoUserInfo(token.getPrincipal().getAttributes());
-            }
-            case "naver" -> {
-                log.info("네이버 로그인 요청");
-                oAuth2UserInfo = new NaverUserInfo(token.getPrincipal().getAttributes());
-            }
-            default -> throw new IllegalArgumentException("지원하지 않는 로그인 제공자입니다: " + provider);
-        }
+        OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(provider, token);
 
         // 정보 추출
         String providerId = oAuth2UserInfo.getProviderId();
@@ -72,22 +59,21 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         User existUser = userRepository.findByProviderId(providerId);
         User user;
 
-        if(existUser == null) {
-            // 신규 유저인 경우
+        // 기존 사용자라면 리프레시 토큰 제거
+        if (existUser != null) {
+            user = existUser;
+            log.info("기존 유저입니다.");
+            refreshTokenRepository.deleteByUserId(user.getUserId());
+        } else {
             log.info("신규 유저입니다. 등록을 진행합니다.");
-
             user = User.builder()
                     .userId(UUID.randomUUID())
                     .name(name)
                     .provider(provider)
                     .providerId(providerId)
                     .build();
+
             userRepository.save(user);
-        } else {
-            // 기존 유저인 경우
-            log.info("기존 유저입니다.");
-            refreshTokenRepository.deleteByUserId(existUser.getUserId());
-            user = existUser;
         }
 
         log.info("유저 이름 : {}", name);
@@ -107,8 +93,30 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         // Access Token 발급
         String accessToken = jwtService.createAccessToken(user.getUserId());
 
+        log.info("Refresh Token: {}", refreshtoken);
+        log.info("Access Token: {}", accessToken);
+
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshtoken);
 
-//        user.updateRefreshToken(refreshtoken);
+        redirectStrategy.sendRedirect(request, response, REDIRECT_URI);
+
+    }
+
+    private OAuth2UserInfo getOAuth2UserInfo(String provider, OAuth2AuthenticationToken token) {
+        switch (provider) {
+            case "google" -> {
+                log.info("구글 로그인 요청");
+                return new GoogleUserInfo(token.getPrincipal().getAttributes());
+            }
+            case "kakao" -> {
+                log.info("카카오 로그인 요청");
+                return new KaKaoUserInfo(token.getPrincipal().getAttributes());
+            }
+            case "naver" -> {
+                log.info("네이버 로그인 요청");
+                return new NaverUserInfo(token.getPrincipal().getAttributes());
+            }
+            default -> throw new IllegalArgumentException("지원하지 않는 로그인 제공자입니다: " + provider);
+        }
     }
 }
