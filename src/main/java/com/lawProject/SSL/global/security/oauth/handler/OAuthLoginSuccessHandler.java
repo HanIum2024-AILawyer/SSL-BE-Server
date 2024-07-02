@@ -98,7 +98,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshtoken);
 
-        redirectStrategy.sendRedirect(request, response, REDIRECT_URI);
+        redirectStrategy.sendRedirect(request, response, "/");
 
     }
 

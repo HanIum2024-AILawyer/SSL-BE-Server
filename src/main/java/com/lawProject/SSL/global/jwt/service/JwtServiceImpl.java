@@ -60,24 +60,6 @@ public class JwtServiceImpl implements JwtService {
         // RefreshToken의 목적은 액세스 토큰의 갱신이기 때문에 클레임 포함X
     }
 
-//    @Override
-//    public void updateRefreshToken(UUID userId, String refreshToken) {
-//        userRepository.findByUserId(userId)
-//                .ifPresentOrElse(
-//                        user -> user.updateRefreshToken(refreshToken), // 값이 존재한다면 refreshToken 업데이트
-//                        () -> new UserException(USER_INQUIRY_FAILED) // 존재하지 않으면 예외 팔생
-//                );
-//    }
-//
-//    @Override
-//    public void destroyRefreshToken(UUID userId) {
-//        userRepository.findByUserId(userId)
-//                .ifPresentOrElse(
-//                        User::destroyRefreshToken, // 값이 존재한다면 refreshToken 삭제
-//                        () -> new UserException(USER_INQUIRY_FAILED) // 존재하지 않으면 예외 발생
-//                );
-//    }
-
     // HTTPServletResponse를 사용하여 클라이언트에게 AccessToken, RefreshToken을 전송하는 메서드
     @Override
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
