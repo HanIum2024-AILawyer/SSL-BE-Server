@@ -25,7 +25,7 @@ public class User extends BaseEntity {
     @Column(name = "users_uuid", columnDefinition = "BINARY(16)", unique = true)
     private UUID userId;
 
-    @Column(name = "name", nullable = false, length = 5)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "provider", nullable = false, length = 10)
