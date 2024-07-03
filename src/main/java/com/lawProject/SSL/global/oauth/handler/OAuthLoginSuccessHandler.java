@@ -1,14 +1,14 @@
-package com.lawProject.SSL.global.security.oauth.handler;
+package com.lawProject.SSL.global.oauth.handler;
 
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
-import com.lawProject.SSL.global.jwt.model.RefreshToken;
-import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
-import com.lawProject.SSL.global.jwt.service.JwtService;
-import com.lawProject.SSL.global.security.oauth.info.GoogleUserInfo;
-import com.lawProject.SSL.global.security.oauth.info.KaKaoUserInfo;
-import com.lawProject.SSL.global.security.oauth.info.NaverUserInfo;
-import com.lawProject.SSL.global.security.oauth.info.OAuth2UserInfo;
+import com.lawProject.SSL.domain.token.model.RefreshToken;
+import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
+import com.lawProject.SSL.global.util.JwtUtil;
+import com.lawProject.SSL.global.oauth.info.GoogleUserInfo;
+import com.lawProject.SSL.global.oauth.info.KaKaoUserInfo;
+import com.lawProject.SSL.global.oauth.info.NaverUserInfo;
+import com.lawProject.SSL.global.oauth.info.OAuth2UserInfo;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +39,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
 
 //    private final JwtUtil jwtUtil;
-    private final JwtService jwtService;
+    private final JwtUtil jwtService;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();

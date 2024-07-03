@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.jwt.service;
+package com.lawProject.SSL.global.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -23,7 +23,7 @@ import static com.lawProject.SSL.global.common.constant.ConstraintConstants.*;
 @Transactional
 @Setter(value = AccessLevel.PRIVATE)
 @Slf4j
-public class JwtServiceImpl implements JwtService {
+public class JwtUtilImpl implements JwtUtil {
 
     /*jwt.yml에 설정된 값 가져오기*/
     @Value("${jwt.secret}")
@@ -99,22 +99,10 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public Optional<String> extractUserId(String accessToken) {
+    public Optional<String> extractUserId(String token) {
         try {
             return Optional.ofNullable(
-                    JWT.require(Algorithm.HMAC512(secret)).build().verify(accessToken).getClaim(USERUUID_CLAIM)
-                            .asString());
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Optional<String> extractRefreshTokenUserId(String refreshToken) {
-        try {
-            return Optional.ofNullable(
-                    JWT.require(Algorithm.HMAC512(secret)).build().verify(refreshToken).getClaim(USERUUID_CLAIM)
+                    JWT.require(Algorithm.HMAC512(secret)).build().verify(token).getClaim(USERUUID_CLAIM)
                             .asString());
         } catch (Exception e) {
             log.error(e.getMessage());

@@ -1,6 +1,6 @@
 package com.lawProject.SSL.global.error.exception;
 
-import com.lawProject.SSL.global.error.ErrorCode;
+import com.lawProject.SSL.global.common.code.ErrorCode;
 import lombok.Getter;
 
 @Getter

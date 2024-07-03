@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.security.oauth.handler;
+package com.lawProject.SSL.global.oauth.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,22 +1,22 @@
-package com.lawProject.SSL.global.security.oauth.info;
+package com.lawProject.SSL.global.oauth.info;
 
 import lombok.AllArgsConstructor;
 
 import java.util.Map;
 
 @AllArgsConstructor
-public class NaverUserInfo implements OAuth2UserInfo {
+public class GoogleUserInfo implements OAuth2UserInfo{
 
     private Map<String, Object> attributes;
-
+    // Test
     @Override
     public String getProviderId() {
-        return (String) attributes.get("id");
+        return (String) attributes.get("sub");
     }
 
     @Override
     public String getProvider() {
-        return "naver";
+        return "google";
     }
 
     @Override

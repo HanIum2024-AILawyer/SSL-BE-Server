@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.security.oauth.info;
+package com.lawProject.SSL.global.oauth.info;
 
 public interface OAuth2UserInfo {
     String getProviderId();

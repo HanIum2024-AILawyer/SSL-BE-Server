@@ -1,93 +1,31 @@
 package com.lawProject.SSL.global.util;
 
-import com.lawProject.SSL.global.jwt.exception.TokenException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.crypto.SecretKey;
-import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
-import static com.lawProject.SSL.global.error.ErrorCode.INVALID_TOKEN;
+public interface JwtUtil {
+    String createAccessToken(UUID userId); // AccessToken 생성
+    String createRefreshToken(UUID userId); // RefreshToken 생성 - 보안, I/O 감소 이유로 사용
 
-@Slf4j
-@Component
-public class JwtUtil {
-    @Value("${jwt.secret}")
-    private String SECRET_KEY;
+//    void updateRefreshToken(UUID userId, String refreshToken); // RefreshToken 갱신
+//
+//    void destroyRefreshToken(UUID userId); // RefreshToken 삭제
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
+    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken); // Token들 전송
+    void sendAccessToken(HttpServletResponse response, String accessToken); // AccessToken 전송
 
-    /* Access Token 발급 */
-    public String generateAccessToken(UUID userId, long expirationMillis) {
-        log.info("액세스 토큰이 발급되었습니다.");
+    Optional<String> extractAccessToken(HttpServletRequest request);
 
-        return Jwts.builder()
-                .claim("userId", userId.toString())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(this.getSigningKey())
-                .compact();
-    }
+    Optional<String> extractRefreshToken(HttpServletRequest request);
 
-    /* Refresh Token 발급 */
-    public String generateRefreshToken(UUID userId, long expirationMillis) {
-        log.info("리프레쉬 토큰이 발급되었습니다.");
+    Optional<String> extractUserId(String accessToken);
 
-        return Jwts.builder()
-                .claim("userId", userId.toString())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(this.getSigningKey())
-                .compact();
-    }
+    void setAccessTokenHeader(HttpServletResponse response, String accessToken);
 
-    /* 응답 헤더에서 액세스 토큰을 반환하는 메서드 */
-    public String getTokenFromHeader(String authorizationHeader) {
-        return authorizationHeader.substring(7);
-    }
+    void setRefreshTokenHeader(HttpServletResponse response, String refreshToken);
 
-    /* 토큰에서 userId를 반환하는 메서드 */
-    public String getUserIdFromToken(String token) {
-        try {
-            String userId = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseEncryptedClaims(token)
-                    .getPayload()
-                    .get("userId", String.class);
-            log.info("userId 반환");
-            return userId;
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.warn("유효하지 않은 토큰입니다.");
-            throw new TokenException(INVALID_TOKEN);
-        }
-    }
-
-    /* JWT 토큰의 유효기간 확인 */
-    public boolean isTokenExpired(String token) {
-        try {
-            Date expirationDate = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseEncryptedClaims(token)
-                    .getPayload()
-                    .getExpiration();
-            log.info("토큰의 유효기간을 확인합니다.");
-            return expirationDate.before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.warn("유효하지 않은 토큰입니다.");
-            throw new TokenException(INVALID_TOKEN);
-        }
-    }
+    boolean isTokenValid(String token);
 }
