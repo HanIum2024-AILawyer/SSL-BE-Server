@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.jwt.model;
+package com.lawProject.SSL.domain.token.model;
 
 import jakarta.persistence.*;
 import lombok.*;

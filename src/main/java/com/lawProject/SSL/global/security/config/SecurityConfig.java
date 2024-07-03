@@ -2,11 +2,11 @@ package com.lawProject.SSL.global.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
-import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
-import com.lawProject.SSL.global.jwt.service.JwtService;
+import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
+import com.lawProject.SSL.global.util.JwtUtil;
 import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
-import com.lawProject.SSL.global.security.oauth.handler.OAuthLoginFailureHandler;
-import com.lawProject.SSL.global.security.oauth.handler.OAuthLoginSuccessHandler;
+import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
+import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtService jwtService;
+    private final JwtUtil jwtService;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
 
@@ -64,14 +64,6 @@ public class SecurityConfig {
                                 .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
                                 .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/", true))
-                .logout((logout) -> logout
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)) // 로그아웃 이후 전체 세션 삭제 여부
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

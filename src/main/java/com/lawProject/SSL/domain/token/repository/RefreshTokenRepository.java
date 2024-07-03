@@ -1,6 +1,6 @@
-package com.lawProject.SSL.global.jwt.repository;
+package com.lawProject.SSL.domain.token.repository;
 
-import com.lawProject.SSL.global.jwt.model.RefreshToken;
+import com.lawProject.SSL.domain.token.model.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
