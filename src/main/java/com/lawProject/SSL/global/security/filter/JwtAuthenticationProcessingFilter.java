@@ -2,8 +2,8 @@ package com.lawProject.SSL.global.security.filter;
 
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
-import com.lawProject.SSL.global.jwt.repository.RefreshTokenRepository;
-import com.lawProject.SSL.global.jwt.service.JwtService;
+import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
+import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    private final JwtService jwtService;
+    private final JwtUtil jwtService;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -43,16 +43,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         System.out.println("Received request URI: " + request.getRequestURI());
         if (request.getRequestURI().equals(NO_CHECK_URL)) {
             filterChain.doFilter(request, response);
-            return;
-        }
-
-        String refreshToken = jwtService
-                .extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
-                .orElse(null);
-
-        if (refreshToken != null) { // Request 요청으로 온 사용자가 refreshToken을 가지고 있다면 AccessToken을 재발급
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
             return;
         }
 
@@ -87,19 +77,5 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         SecurityContext context = SecurityContextHolder.createEmptyContext();//5
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
-    }
-
-    private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-//        userRepository.findByRefreshToken(refreshToken).ifPresent(
-//                user -> jwtService.sendAccessToken(response, jwtService.createAccessToken(user.getUserId()))
-//        );
-
-        jwtService.extractRefreshTokenUserId(refreshToken).ifPresent(
-                userId -> userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
-                        user -> jwtService.sendAccessToken(response, jwtService.createAccessToken(user.getUserId()))
-                )
-        );
-
-
     }
 }
