@@ -1,10 +1,10 @@
-package com.lawProject.SSL.global.error.exception;
+package com.lawProject.SSL.global.error;
 
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.global.common.response.ApiResponse;
-import com.lawProject.SSL.global.error.ErrorCode;
-import com.lawProject.SSL.global.error.ErrorResponse;
-import com.lawProject.SSL.global.jwt.exception.TokenException;
+import com.lawProject.SSL.global.common.code.ErrorCode;
+import com.lawProject.SSL.global.error.exception.BusinessException;
+import com.lawProject.SSL.domain.token.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<ApiResponse<ErrorCode>> handleAccessDeniedException(AccessDeniedException e) {
         log.error("handleAccessDeniedException", e);
-        return ApiResponse.onFailure(ErrorCode.HANDLE_ACCESS_DENIED);
+        return ApiResponse.onFailure(ErrorCode._FORBIDDEN);
     }
 
     /**
