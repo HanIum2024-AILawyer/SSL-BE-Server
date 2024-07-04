@@ -1,4 +1,4 @@
-package com.lawProject.SSL.global.security.config;
+package com.lawProject.SSL.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
