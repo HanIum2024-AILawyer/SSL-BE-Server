@@ -1,12 +1,12 @@
 package com.lawProject.SSL.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.global.util.JwtUtil;
-import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
+import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
+import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
+import com.lawProject.SSL.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -52,7 +53,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // CORS 설정 추가
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll() // 정적 자원 설정
                         .requestMatchers("/","/join", "/login/**").permitAll()
