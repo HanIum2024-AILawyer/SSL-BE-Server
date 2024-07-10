@@ -1,16 +1,20 @@
 package com.lawProject.SSL.global.error;
 
-import com.lawProject.SSL.domain.user.exception.UserException;
-import com.lawProject.SSL.global.common.response.ApiResponse;
-import com.lawProject.SSL.global.common.code.ErrorCode;
-import com.lawProject.SSL.global.error.exception.BusinessException;
 import com.lawProject.SSL.domain.token.exception.TokenException;
+import com.lawProject.SSL.domain.user.exception.UserException;
+import com.lawProject.SSL.global.common.code.ErrorCode;
+import com.lawProject.SSL.global.common.response.ApiResponse;
+import com.lawProject.SSL.global.error.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -28,6 +32,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.error("handleMethodArgumentTypeMismatchException", e);
         final ErrorResponse response = ErrorResponse.of(e);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * MethodArgumentNotValidException 예외 처리
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        log.error("handleMethodArgumentNotValidException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode._INVALID_INPUT_VALUE, e.getBindingResult());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

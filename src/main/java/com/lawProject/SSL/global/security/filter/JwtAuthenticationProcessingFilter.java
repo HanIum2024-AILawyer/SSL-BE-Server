@@ -1,8 +1,8 @@
 package com.lawProject.SSL.global.security.filter;
 
+import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,31 +51,31 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         jwtService.extractAccessToken(request).filter(jwtService::isTokenValid).ifPresent(
-
                 accessToken -> jwtService.extractUserId(accessToken).ifPresent(
-
                         userId -> userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
-                                user -> saveAuthentication(user)
+                                this::saveAuthentication
                         )
                 )
         );
 
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 
+    private void saveAuthentication(User user) {
+        UserDetails userDetails = createUserDetails(user);
 
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
-    private void saveAuthentication(User users) {
-        UserDetails user = org.springframework.security.core.userdetails.User.builder()
-                .username(users.getName())
-                .roles(users.getRole().name())
-                .build();
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, authoritiesMapper.mapAuthorities(user.getAuthorities()));
-
-
-        SecurityContext context = SecurityContextHolder.createEmptyContext();//5
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
+    }
+
+    private static UserDetails createUserDetails(User user) {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getName())
+                .password("") // 비밀번호 필드는 일반적으로 사용되지 않지만 빈 문자열로 설정
+                .roles(user.getRole().name())
+                .build();
     }
 }
