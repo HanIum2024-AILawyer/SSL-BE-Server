@@ -1,5 +1,6 @@
 package com.lawProject.SSL.global.oauth.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.token.model.RefreshToken;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
@@ -34,9 +35,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
 
 //    private final JwtUtil jwtUtil;
-    private final JwtUtil jwtService;
+    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ObjectMapper objectMapper;
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
@@ -45,7 +47,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         User user = oAuth2User.getUser();
 
         // Refresh Token 발급 후 저장
-        String refreshToken = jwtService.createRefreshToken(user.getUserId());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
         RefreshToken newRefreshToken = RefreshToken.builder()
                 .userId(user.getUserId())
                 .token(refreshToken)
@@ -53,13 +55,14 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         refreshTokenRepository.save(newRefreshToken);
 
         // Access Token 발급
-        String accessToken = jwtService.createAccessToken(user.getUserId());
+        String accessToken = jwtUtil.createAccessToken(user.getUserId());
 
         log.info("Refresh Token: {}", refreshToken);
         log.info("Access Token: {}", accessToken);
 
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
-
-        redirectStrategy.sendRedirect(request, response, REDIRECT_URI);
+        jwtUtil.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        // 토큰 정보를 포함한 리다이렉트 URL 생성
+        String redirectUrl = REDIRECT_URI + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
+        redirectStrategy.sendRedirect(request, response, redirectUrl);
     }
 }
