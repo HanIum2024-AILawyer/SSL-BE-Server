@@ -45,15 +45,4 @@ public class User extends BaseEntity {
         this.provider = provider;
         this.providerId = providerId;
     }
-
-    //    private UserStatus userStatus;
-//    /*Using Method*/
-//    public void updateRefreshToken(String refreshToken) {
-//        this.refreshToken = refreshToken;
-//    }
-//
-//    public void destroyRefreshToken() {
-//        this.refreshToken = null;
-//    }
-
 }
