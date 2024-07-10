@@ -2,7 +2,6 @@ package com.lawProject.SSL.domain.user.model;
 
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +34,7 @@ public class User extends BaseEntity {
     private String providerId; // 카카오에서 이메일을 받을 수 없기 때문에, 로그인 시 providerId를 추출하여 각 유저를 구분한다.
 //    private String refreshToken;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
     private UserRole role = USER;
 
     @Builder

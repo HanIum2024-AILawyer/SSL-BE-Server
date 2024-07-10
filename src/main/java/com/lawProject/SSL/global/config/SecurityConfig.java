@@ -5,6 +5,7 @@ import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
+import com.lawProject.SSL.global.oauth.service.CustomOAuth2UserService;
 import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
 import com.lawProject.SSL.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -32,18 +35,7 @@ public class SecurityConfig {
     private final JwtUtil jwtService;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
-
-    // CORS 설정
-    CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*"));
-            config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Collections.singletonList("*")); // 허용할 origin
-            config.setAllowCredentials(true);
-            return config;
-        };
-    }
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -62,6 +54,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                         oauth
+                                .userInfoEndpoint(end -> end.userService(customOAuth2UserService))
                                 .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
                                 .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 )
@@ -73,6 +66,22 @@ public class SecurityConfig {
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
 
         return new JwtAuthenticationProcessingFilter(jwtService, userRepository, refreshTokenRepository);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    private CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setAllowedMethods(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(Collections.singletonList("*"));
+            config.setAllowCredentials(true);
+            return config;
+        };
     }
 }
 
