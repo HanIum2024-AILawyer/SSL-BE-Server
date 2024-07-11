@@ -3,7 +3,11 @@ package com.lawProject.SSL.global.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lawProject.SSL.domain.token.exception.TokenException;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.domain.user.exception.UserException;
+import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -99,14 +103,16 @@ public class JwtUtilImpl implements JwtUtil {
     }
 
     @Override
-    public Optional<String> extractUserId(String token) {
+    public String extractUserId(String token) {
         try {
-            return Optional.ofNullable(
-                    JWT.require(Algorithm.HMAC512(secret)).build().verify(token).getClaim(USERUUID_CLAIM)
-                            .asString());
+            return JWT.require(Algorithm.HMAC512(secret))
+                            .build()
+                            .verify(token)
+                            .getClaim(USERUUID_CLAIM)
+                            .asString();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return Optional.empty();
+            log.info("유효하지 않은 토큰입니다. 이유: {}", e.getMessage());
+            throw new TokenException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -131,8 +137,13 @@ public class JwtUtilImpl implements JwtUtil {
         }
     }
 
-    // 응답 헤더에서 액세스 토큰을 반환하는 메서드
-    public String getTokenFromHeader(String authorizationHeader) {
-        return authorizationHeader.substring(7);
+    @Override
+    // Request 에서 유저를 반환하는 메서드
+    public User getUserFromRequest(HttpServletRequest request) {
+        String accessToken = extractAccessToken(request).orElseThrow(() -> new TokenException(ErrorCode.INVALID_ACCESS_TOKEN));
+        String userId = extractUserId(accessToken);
+
+        return userRepository.findByUserId(UUID.fromString(userId))
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
     }
 }

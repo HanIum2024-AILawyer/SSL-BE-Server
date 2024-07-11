@@ -1,5 +1,6 @@
 package com.lawProject.SSL.global.util;
 
+import com.lawProject.SSL.domain.user.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -21,11 +22,13 @@ public interface JwtUtil {
 
     Optional<String> extractRefreshToken(HttpServletRequest request);
 
-    Optional<String> extractUserId(String accessToken);
+    String extractUserId(String accessToken);
 
     void setAccessTokenHeader(HttpServletResponse response, String accessToken);
 
     void setRefreshTokenHeader(HttpServletResponse response, String refreshToken);
 
     boolean isTokenValid(String token);
+
+    User getUserFromRequest(HttpServletRequest request);
 }
