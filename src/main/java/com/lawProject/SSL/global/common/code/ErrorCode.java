@@ -44,7 +44,16 @@ public enum ErrorCode implements BaseCode{
     INVALID_TOKEN(UNAUTHORIZED, "T001", "유효하지 않은 토큰입니다."),
     INVALID_ACCESS_TOKEN(UNAUTHORIZED, "T002", "유효하지 않은 액세스 토큰입니다."),
     INVALID_REFRESH_TOKEN(UNAUTHORIZED, "T003", "유효하지 않은 리프레쉬 토큰입니다."),
-    REFRESH_TOKEN_NOT_FOUND(NOT_FOUND, "T004", "해당 유저 ID의 리프레쉬 토큰이 없습니다.");
+    REFRESH_TOKEN_NOT_FOUND(NOT_FOUND, "T004", "해당 유저 ID의 리프레쉬 토큰이 없습니다."),
+
+    /**
+     * File
+     */
+    FILE_NOT_UPLOADED(BAD_REQUEST, "F001", "파일이 업로드되지 않았습니다."),
+    FILE_EMPTY(BAD_REQUEST, "F002", "빈 파일입니다."),
+    FILE_UPLOAD_FAILED(INTERNAL_SERVER_ERROR, "F003", "파일 업로드에 실패했습니다."),
+    FILE_NOT_FOUND(NOT_FOUND, "F004", "파일을 찾을 수 없습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;

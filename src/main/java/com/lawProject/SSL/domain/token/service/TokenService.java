@@ -23,7 +23,7 @@ public class TokenService {
 
     public TokenResponse reissueAccessToken(HttpServletRequest request) {
         String refreshToken = jwtUtil.extractRefreshToken(request).orElseThrow(() -> new TokenException(ErrorCode.INVALID_REFRESH_TOKEN));
-        String userId = jwtUtil.extractUserId(refreshToken).orElseThrow(() -> new TokenException(ErrorCode.INVALID_REFRESH_TOKEN));
+        String userId = jwtUtil.extractUserId(refreshToken);
 
         validateRefreshToken(userId, refreshToken);
 

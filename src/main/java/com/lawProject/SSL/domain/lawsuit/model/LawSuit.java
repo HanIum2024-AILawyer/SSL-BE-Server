@@ -28,9 +28,13 @@ public class LawSuit extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    /* Using Method */
+    public void setExpireTime(LocalDateTime expireTime) {
+        this.expireTime = expireTime;
+    }
+
     /* 연관관계 메서드 */
-    public LawSuit ofUser(User user, String fileUrl) {
-        this.user = user;
+    public static LawSuit ofUser(User user, String fileUrl) {
         return LawSuit.builder()
                 .user(user)
                 .fileUrl(fileUrl)
