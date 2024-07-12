@@ -9,6 +9,7 @@ import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,9 +44,9 @@ public class LawSuitService {
         throw new FileException(ErrorCode.FILE_NOT_UPLOADED);
     }
 
-    public UrlResource downloadFile(String filename) throws MalformedURLException {
+    public Resource downloadFile(String filename) throws MalformedURLException {
         Path filePath = Paths.get(fileService.getFullPath(filename)).toAbsolutePath().normalize();
-        UrlResource resource = new UrlResource(filePath.toUri());
+        Resource resource = new UrlResource(filePath.toUri());
 
         if (resource.exists()) {
             return resource;

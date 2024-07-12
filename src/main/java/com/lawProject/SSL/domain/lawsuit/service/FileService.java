@@ -1,5 +1,7 @@
 package com.lawProject.SSL.domain.lawsuit.service;
 
+import com.lawProject.SSL.domain.lawsuit.exception.FileException;
+import com.lawProject.SSL.global.common.code.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,11 @@ public class FileService {
         String originalFilename = multipartFile.getOriginalFilename();
         String fileName = createServerFileName(originalFilename); //랜덤의 uuid를 추가한 파일 이름
         String fullPath = getFullPath(fileName);
-        multipartFile.transferTo(new File(fullPath));
+        try {
+            multipartFile.transferTo(new File(fullPath));
+        } catch (IOException e) {
+            throw new FileException(ErrorCode.FILE_UPLOAD_FAILED);
+        }
 
         return fullPath;
     }
