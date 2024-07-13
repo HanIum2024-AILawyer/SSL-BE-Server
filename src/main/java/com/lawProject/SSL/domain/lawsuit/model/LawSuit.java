@@ -1,18 +1,18 @@
 package com.lawProject.SSL.domain.lawsuit.model;
 
-import com.lawProject.SSL.global.common.dao.BaseEntity;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 import static jakarta.persistence.FetchType.LAZY;
 
-@Getter
 @Entity
+@Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LawSuit extends BaseEntity {
     @Id
@@ -24,10 +24,20 @@ public class LawSuit extends BaseEntity {
 
     private LocalDateTime expireTime;
 
-//    @NotNull
-//    private SuitStatus suitStatus;
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    /* Using Method */
+    public void setExpireTime(LocalDateTime expireTime) {
+        this.expireTime = expireTime;
+    }
+
+    /* 연관관계 메서드 */
+    public static LawSuit ofUser(User user, String fileUrl) {
+        return LawSuit.builder()
+                .user(user)
+                .fileUrl(fileUrl)
+                .build();
+    }
 }

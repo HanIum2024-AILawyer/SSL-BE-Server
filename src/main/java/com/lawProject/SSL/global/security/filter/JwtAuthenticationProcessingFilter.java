@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    private final JwtUtil jwtService;
+    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -50,12 +50,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtService.extractAccessToken(request).filter(jwtService::isTokenValid).ifPresent(
-                accessToken -> jwtService.extractUserId(accessToken).ifPresent(
-                        userId -> userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
-                                this::saveAuthentication
-                        )
-                )
+        jwtUtil.extractAccessToken(request).filter(jwtUtil::isTokenValid).ifPresent(
+                accessToken -> {
+                    String userId = jwtUtil.extractUserId(accessToken);
+                    userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
+                            this::saveAuthentication
+                    );
+                }
         );
 
         filterChain.doFilter(request, response);

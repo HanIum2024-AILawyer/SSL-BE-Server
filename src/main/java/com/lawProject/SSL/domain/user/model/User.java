@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.user.model;
 
+import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,13 +8,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.lawProject.SSL.domain.user.model.UserRole.USER;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Entity
-@Table(name = "users")
+@Table(name = "tblUser")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
     @Id
@@ -36,6 +40,9 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private UserRole role = USER;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
+    private List<LawSuit> lawSuitList = new ArrayList<>();
 
     @Builder
     public User(UUID userId, String name, String provider, String providerId) {
