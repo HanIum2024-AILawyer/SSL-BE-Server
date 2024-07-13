@@ -45,3 +45,9 @@ Self Servicing Law
 ### System Architecture
 <img width="765" alt="스크린샷 2024-07-04 17 58 54" src="https://github.com/pp8817/SSL/assets/71458064/72bad016-0b8b-458e-b07a-10120294f751">
 
+### Commit Message Convention
+<img width="721" alt="commit Message" src="https://github.com/user-attachments/assets/f9b6d831-7976-4eeb-817c-4c448dcf3080">
+
+
+
+
