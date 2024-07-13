@@ -27,6 +27,10 @@ public class LawSuitController {
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Object>> uploadFile(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
         try {
+            // 파일 형식 검사
+            if (!isWordFile(file)) {
+                return ApiResponse.onFailure(ErrorCode.INVALID_FILE_TYPE);
+            }
             String fileUrl = lawSuitService.uploadFile(file, request);
             return ApiResponse.onSuccess(SuccessCode._OK, fileUrl);
         } catch (IOException e) {
@@ -46,5 +50,25 @@ public class LawSuitController {
             log.info("File download failed", e);
             throw new FileException(ErrorCode.FILE_NOT_FOUND);
         }
+    }
+
+    private boolean isWordFile(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null) {
+            String extension = getFileExtension(originalFilename);
+            return extension != null && (
+                    extension.equalsIgnoreCase("doc") ||
+                            extension.equalsIgnoreCase("docx")
+            );
+        }
+        return false;
+    }
+
+    private String getFileExtension(String filename) {
+        int pos = filename.lastIndexOf(".");
+        if (pos != -1) {
+            return filename.substring(pos + 1);
+        }
+        return null;
     }
 }

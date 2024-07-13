@@ -2,13 +2,21 @@ package com.lawProject.SSL.domain.lawsuit.service;
 
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.global.common.code.ErrorCode;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,25 +25,37 @@ import java.util.UUID;
 @Slf4j
 public class FileService {
 
-    @Value("${file.dir}")
-    private String fileDir;
+    private final Path fileStorageLocation;
+
+    public FileService(@Value("${file.dir}") String uploadDir) {
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            Files.createDirectories(fileStorageLocation);
+        } catch (IOException ex) {
+            throw new FileException(ErrorCode.FILE_STORGE_ERROR);
+        }
+    }
 
     public String getFullPath(String filename) {
-        return fileDir + filename;
+        return this.fileStorageLocation.resolve(filename).toString();
     }
 
-    public List<String> storeFiles(List<MultipartFile> multipartFiles) throws IOException {
-        List<String> imageUrlList = new ArrayList<>();
+    public List<String> storeFiles(List<MultipartFile> multipartFiles) {
+        List<String> fileUrls = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFile.isEmpty()) {
-                imageUrlList.add(storeFile(multipartFile)); //파일의 이름 정보가 들어간 UploadFile 객체를 storeFileResult에 넣어줌
+                fileUrls.add(storeFile(multipartFile)); //파일의 이름 정보가 들어간 UploadFile 객체를 storeFileResult에 넣어줌
             }
         }
-        return imageUrlList;
+        return fileUrls;
 
     }
 
-    public String storeFile(MultipartFile multipartFile) throws IOException {
+    public String storeFile(MultipartFile multipartFile) {
         if (multipartFile.isEmpty()) {
             throw new IllegalArgumentException("Empty file.");
         }
@@ -44,12 +64,37 @@ public class FileService {
         String fileName = createServerFileName(originalFilename); //랜덤의 uuid를 추가한 파일 이름
         String fullPath = getFullPath(fileName);
         try {
-            multipartFile.transferTo(new File(fullPath));
+            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Files.copy(multipartFile.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new FileException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
-        return fullPath;
+        return fileName;
+    }
+
+    public Resource loadFileAsResource(String fileName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new FileException(ErrorCode.FILE_NOT_FOUND);
+            }
+        } catch (MalformedURLException ex) {
+            throw new FileException(ErrorCode.FILE_NOT_FOUND);
+        }
+    }
+
+    public void deleteAllFiles() {
+        try {
+            Files.walk(fileStorageLocation)
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException ex) {
+            throw new FileException(ErrorCode.FILE_STORGE_ERROR);
+        }
     }
 
     // 서버 내부에서 관리하는 파일명은 유일한 이름을 생성하는 UUID를 사용해서 충돌하지 않도록 한다.
