@@ -16,7 +16,12 @@ public class ChatMessage extends BaseEntity {
     @Column(name = "chat_message_id")
     private Long id;
 
-    private String message;
+    private String content;
+
+    private String sender;
+
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
