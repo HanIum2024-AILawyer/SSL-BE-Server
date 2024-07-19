@@ -6,8 +6,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.Map;
-
 /**
  * 수신된 메시지를 AI와 연동하여 응답을 생성
  */
@@ -21,13 +19,14 @@ public class WebSockChatHandler extends TextWebSocketHandler {
         log.info("Received payload: {}", payload);
 
         // WebSocketSession의 속성에서 사용자 정보를 가져오기
-        Map<String, Object> attributes = session.getAttributes();
-        String userId = (String) attributes.get("userId");
+//        Map<String, Object> attributes = session.getAttributes();
+//        String userId = (String) attributes.get("userId");
 
         // AI 모델과 연동하여 응답 생성 로직 추가
-        String response = generateResponseFromAI(userId, payload);
+//        String response = generateResponseFromAI(userId, payload);
 
-        TextMessage textMessage = new TextMessage(response);
+//        TextMessage textMessage = new TextMessage(response);
+        TextMessage textMessage = new TextMessage("hi");
         session.sendMessage(textMessage);
     }
 
