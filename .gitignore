@@ -9,11 +9,11 @@ build/
 application.properties
 
 # application.properties 파일 무시
-application.yml
-application-ai.yml
-application-file.yml
-application-jwt.yml
-application-security.yml
+**/application.yml
+**/application-ai.yml
+**/application-file.yml
+**/application-jwt.yml
+**/application-security.yml
 
 ### STS ###
 .apt_generated
