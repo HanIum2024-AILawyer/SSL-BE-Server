@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class LangchainController {
+public class LangChainController {
 
     private final ChatLanguageModel chatLanguageModel;
 
