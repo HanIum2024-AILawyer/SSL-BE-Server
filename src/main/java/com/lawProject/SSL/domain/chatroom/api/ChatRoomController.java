@@ -40,10 +40,13 @@ public class ChatRoomController {
                 .buildAndExpand(roomId)
                 .toUri();
 
+        // 이때 프론트엔드는 roomId를 뽑아서 해당 채팅방을 "stompClient.subscribe('/sub/chats/' + roomId, function(message)" 처럼 구독해야 됨
+
         // 채팅방을 생성한 후 채팅방으로 이동
         return ApiResponse.onSuccess(SuccessCode._CREATED, location);
     }
 
+    // 채팅방 열기
     @GetMapping("/{room-id}")
     public ResponseEntity<ApiResponse<Object>> getChatRoomWithMessages(@PathVariable("room-id") String roomId,
                                                           @RequestParam(defaultValue = "1") int page,
@@ -51,7 +54,7 @@ public class ChatRoomController {
                                                           HttpServletRequest request
             ) {
 
-        // page, size 유효성 검증
+        // page, size 유효성 검정
         if (page < 1) page = 1;
         if (size < 1) size = 10;
 
@@ -63,7 +66,9 @@ public class ChatRoomController {
                 ChatRoomMessageResponse::of
         ).toList();
 
-        ChatRoomMessageWithPageInfoResponse chatRoomMessageWithPageInfoResponse = ChatRoomMessageWithPageInfoResponse.of(roomMessageResponses, pageInfo);
+        Long userId = userService.getUserInfo(request).getId();
+
+        ChatRoomMessageWithPageInfoResponse chatRoomMessageWithPageInfoResponse = ChatRoomMessageWithPageInfoResponse.of(roomMessageResponses, pageInfo, userId);
 
         return ApiResponse.onSuccess(SuccessCode._OK, chatRoomMessageWithPageInfoResponse);
     }
