@@ -21,7 +21,7 @@ public class ChatMessage extends BaseEntity {
     private String content; // 메시지 내용
 
     @Enumerated(EnumType.STRING)
-    private MessageType messageType;
+    private SenderType senderType; // USER or AI
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
