@@ -33,12 +33,14 @@ public class MessageResponse {
     @Builder
     public record ChatRoomMessageWithPageInfoResponse(
             List<ChatRoomMessageResponse> chatRoomMessageResponses,
-            PageInfo pageInfo
+            PageInfo pageInfo,
+            Long userId
     ) {
-        public static ChatRoomMessageWithPageInfoResponse of(List<ChatRoomMessageResponse> chatRoomMessageResponses, PageInfo pageInfo) {
+        public static ChatRoomMessageWithPageInfoResponse of(List<ChatRoomMessageResponse> chatRoomMessageResponses, PageInfo pageInfo, Long userId) {
             return ChatRoomMessageWithPageInfoResponse.builder()
                     .chatRoomMessageResponses(chatRoomMessageResponses)
                     .pageInfo(pageInfo)
+                    .userId(userId)
                     .build();
         }
     }
