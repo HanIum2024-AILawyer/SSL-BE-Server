@@ -20,7 +20,7 @@ public class MessageDto implements Serializable {
     @NotBlank
     private String content;
 
-    private String senderType;
+    private String senderType = "USER";
 
     public void setContent(String content) {
         this.content = content;

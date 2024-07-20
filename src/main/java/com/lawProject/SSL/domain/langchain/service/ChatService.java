@@ -26,18 +26,35 @@ public class ChatService {
 
     @Transactional
     public void saveMessage(MessageDto dto, String roomId) {
-        User user = userService.findById(dto.getSenderId());
-        ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
+        if (dto.getSenderId() != null) { // User인 경우
+            User user = userService.findById(dto.getSenderId());
+            ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
 
-        ChatMessage chatMessage = ChatMessage.builder()
-                .content(dto.getContent())
-                .sender(user)
-                .chatRoom(chatRoom)
-                .senderType(dto.getSenderType())
-                .build();
+            ChatMessage chatMessage = ChatMessage.builder()
+                    .content(dto.getContent())
+                    .sender(user)
+                    .chatRoom(chatRoom)
+                    .senderType(dto.getSenderType())
+                    .build();
 
-        messageRepository.save(chatMessage);
-        log.info("메시지 저장 완료");
+            messageRepository.save(chatMessage);
+
+            chatRoom.addMessage(chatMessage);
+            log.info("메시지 저장 완료");
+        } else { // AI인 경우
+            ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
+
+            ChatMessage chatMessage = ChatMessage.builder()
+                    .content(dto.getContent())
+                    .chatRoom(chatRoom)
+                    .senderType(dto.getSenderType())
+                    .build();
+
+            messageRepository.save(chatMessage);
+
+            chatRoom.addMessage(chatMessage);
+            log.info("메시지 저장 완료");
+        }
     }
 
     public Page<ChatMessage> getChatRoomMessages(String roomId, int page, int size) {
