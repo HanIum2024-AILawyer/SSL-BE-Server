@@ -14,8 +14,6 @@ import java.io.Serializable;
 public class MessageDto implements Serializable {
     private static final long serialVersionUID = 2082503192322391880L;
     @NotNull
-    private String roomId;
-    @NotNull
     private Long senderId;
     @NotBlank
     private String content;

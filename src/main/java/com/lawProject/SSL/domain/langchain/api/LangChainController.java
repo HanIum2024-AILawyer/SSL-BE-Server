@@ -43,7 +43,7 @@ public class LangChainController {
         String response = chatLanguageModel.generate(messageDto.getContent());
 
         // AI 응답 메시지 생성
-        MessageDto responseMessageDto = new MessageDto(roomId, null, response, "AI");
+        MessageDto responseMessageDto = new MessageDto(null, response, "AI");
         PublishMessage publishMessage = new PublishMessage(roomId, responseMessageDto.getSenderId(), responseMessageDto.getContent(), LocalDateTime.now());
 
         log.info("publishMessage: {}", publishMessage.getContent());
