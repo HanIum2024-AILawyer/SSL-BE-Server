@@ -5,11 +5,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface JwtUtil {
-    String createAccessToken(UUID userId); // AccessToken 생성
-    String createRefreshToken(UUID userId); // RefreshToken 생성 - 보안, I/O 감소 이유로 사용
+    String createAccessToken(String userId); // AccessToken 생성
+    String createRefreshToken(String userId); // RefreshToken 생성 - 보안, I/O 감소 이유로 사용
 
 //    void updateRefreshToken(UUID userId, String refreshToken); // RefreshToken 갱신
 //

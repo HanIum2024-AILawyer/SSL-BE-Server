@@ -46,20 +46,20 @@ public class JwtUtilImpl implements JwtUtil {
 
 
     @Override
-    public String createAccessToken(UUID userId) {
+    public String createAccessToken(String userId) {
         return JWT.create() // JWT 생성 빌더를 초기화
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject를 설정한다. subject는 토큰의 목적, 주제를 나타냄.
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessTokenValidityInSeconds)) // 만료 시간 설정
-                .withClaim(USERUUID_CLAIM, userId.toString()) // 토큰에 UserId 정보를 클레임으로 추가
+                .withClaim(USERUUID_CLAIM, userId) // 토큰에 UserId 정보를 클레임으로 추가
                 .sign(Algorithm.HMAC512(secret)); // HMAC512 알고리즘을 사용하여, 토큰에 서명. 서명 키: secret 변수로 설정된 값
     }
 
     @Override
-    public String createRefreshToken(UUID userId) {
+    public String createRefreshToken(String userId) {
         return JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenValidityInSeconds))
-                .withClaim(USERUUID_CLAIM, userId.toString())
+                .withClaim(USERUUID_CLAIM, userId)
                 .sign(Algorithm.HMAC512(secret));
         // RefreshToken의 목적은 액세스 토큰의 갱신이기 때문에 클레임 포함X
     }
