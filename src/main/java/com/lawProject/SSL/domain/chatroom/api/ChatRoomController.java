@@ -51,6 +51,10 @@ public class ChatRoomController {
                                                           HttpServletRequest request
             ) {
 
+        // page, size 유효성 검증
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
+
         Page<ChatMessage> messages =
                 chatService.getChatRoomMessages(roomId, page, size);
         PageInfo pageInfo = new PageInfo(page, size, (int)messages.getTotalElements(), messages.getTotalPages());
