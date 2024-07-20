@@ -39,6 +39,9 @@ dependencies {
 	// DB
 	runtimeOnly 'com.h2database:h2' // 초반 엔티티 설계 후 PostgreSQL로 변경 예정
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	// JPA
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.2'
@@ -47,8 +50,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'com.auth0:java-jwt:3.18.1'
 
+
 	// AI
-	implementation 'dev.langchain4j:langchain4j-ollama-spring-boot-starter:0.32.0' // LangChain4j 의존성 추가
+//	implementation 'dev.langchain4j:langchain4j-ollama-spring-boot-starter:0.32.0' // LangChain4j 의존성 추가
 
 	// Utils
 	compileOnly 'org.projectlombok:lombok:1.18.24'

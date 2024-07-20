@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +26,7 @@ public class TokenService {
 
         validateRefreshToken(userId, refreshToken);
 
-        String accessToken = jwtUtil.createAccessToken(UUID.fromString(userId));
+        String accessToken = jwtUtil.createAccessToken(userId);
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -37,7 +36,7 @@ public class TokenService {
     /* 토큰이 존재하는지, 일치하는지, 유효한지 검증 */
     private void validateRefreshToken(String userId, String refreshToken) {
 
-        Optional<RefreshToken> existRefreshTokenOpt = refreshTokenRepository.findByUserId(UUID.fromString(userId));
+        Optional<RefreshToken> existRefreshTokenOpt = refreshTokenRepository.findByUserId(userId);
         if (!existRefreshTokenOpt.isPresent()) {
             throw new TokenException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }

@@ -54,7 +54,12 @@ public enum ErrorCode implements BaseCode{
     FILE_UPLOAD_FAILED(INTERNAL_SERVER_ERROR, "F003", "파일 업로드에 실패했습니다."),
     FILE_NOT_FOUND(NOT_FOUND, "F004", "파일을 찾을 수 없습니다."),
     INVALID_FILE_TYPE(UNAUTHORIZED, "F005", "파일 형식이 맞지 않습니다."),
-    FILE_STORGE_ERROR(INSUFFICIENT_STORAGE, "F005", "파일 저장에 실패했습니다");
+    FILE_STORGE_ERROR(INSUFFICIENT_STORAGE, "F005", "파일 저장에 실패했습니다"),
+
+    /**
+     * ChatRoom
+     */
+    ROOM_NOT_FOUND(NOT_FOUND, "R001", "존재하지 않는 채팅방입니다.");
 
 
     private final HttpStatus httpStatus;

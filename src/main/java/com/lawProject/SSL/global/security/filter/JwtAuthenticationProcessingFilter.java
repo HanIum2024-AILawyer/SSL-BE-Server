@@ -19,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * OncePerRequestFilter: 모든 서블릿 컨테이너에서 요청 디스패치당 단일 실행을 보장하는 것을 목표로 하는 필터 기본 클래스
@@ -53,7 +52,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         jwtUtil.extractAccessToken(request).filter(jwtUtil::isTokenValid).ifPresent(
                 accessToken -> {
                     String userId = jwtUtil.extractUserId(accessToken);
-                    userRepository.findByUserId(UUID.fromString(userId)).ifPresent(
+                    userRepository.findByUserId(userId).ifPresent(
                             this::saveAuthentication
                     );
                 }

@@ -14,6 +14,7 @@ application.properties
 **/application-file.yml
 **/application-jwt.yml
 **/application-security.yml
+**/application-redis.yml
 
 ### STS ###
 .apt_generated

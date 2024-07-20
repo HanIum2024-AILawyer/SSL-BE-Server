@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static com.lawProject.SSL.domain.user.model.UserRole.USER;
 import static jakarta.persistence.FetchType.LAZY;
@@ -25,8 +24,8 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "users_uuid", columnDefinition = "BINARY(16)", unique = true)
-    private UUID userId;
+    @Column(name = "users_uuid", columnDefinition = "VARCHAR(36)", unique = true)
+    private String userId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -36,7 +35,6 @@ public class User extends BaseEntity {
 
     @Column(name = "provider_id", nullable = false, length = 50)
     private String providerId; // 카카오에서 이메일을 받을 수 없기 때문에, 로그인 시 providerId를 추출하여 각 유저를 구분한다.
-//    private String refreshToken;
 
     @Enumerated(EnumType.STRING)
     private UserRole role = USER;
@@ -45,7 +43,7 @@ public class User extends BaseEntity {
     private List<LawSuit> lawSuitList = new ArrayList<>();
 
     @Builder
-    public User(UUID userId, String name, String provider, String providerId) {
+    public User(String userId, String name, String provider, String providerId) {
         this.userId = userId;
         this.name = name;
         this.provider = provider;

@@ -52,7 +52,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private User createUser(OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
-                .userId(UUID.randomUUID())
+                .userId(UUID.randomUUID().toString())
                 .name(oAuth2UserInfo.getName())
                 .provider(oAuth2UserInfo.getProvider())
                 .providerId(oAuth2UserInfo.getProviderId())
