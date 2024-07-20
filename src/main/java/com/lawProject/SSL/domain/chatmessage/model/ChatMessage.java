@@ -40,9 +40,18 @@ public class ChatMessage extends BaseEntity {
     }
 
     @Builder
-    public ChatMessage(String content, User sender, ChatRoom chatRoom) {
+    public ChatMessage(String content, User sender, ChatRoom chatRoom, String senderType) {
         this.content = content;
         this.user = sender;
         this.chatRoom = chatRoom;
+        this.senderType = resolveSenderType(senderType);
+    }
+
+    private SenderType resolveSenderType(String senderType) {
+        if ("User".equalsIgnoreCase(senderType)) {
+            return SenderType.USER;
+        } else {
+            return SenderType.AI;
+        }
     }
 }
