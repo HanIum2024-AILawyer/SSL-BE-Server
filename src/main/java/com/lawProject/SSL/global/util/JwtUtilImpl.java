@@ -143,7 +143,7 @@ public class JwtUtilImpl implements JwtUtil {
         String accessToken = extractAccessToken(request).orElseThrow(() -> new TokenException(ErrorCode.INVALID_ACCESS_TOKEN));
         String userId = extractUserId(accessToken);
 
-        return userRepository.findByUserId(UUID.fromString(userId))
+        return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
     }
 }
