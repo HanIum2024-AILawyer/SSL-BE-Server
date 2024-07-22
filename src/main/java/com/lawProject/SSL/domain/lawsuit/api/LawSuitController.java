@@ -1,6 +1,7 @@
 package com.lawProject.SSL.domain.lawsuit.api;
 
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
+import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.lawsuit.service.LawSuitService;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.code.SuccessCode;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 @Slf4j
 @RestController
@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 @RequestMapping("/api/v1/lawsuit")
 public class LawSuitController {
     private final LawSuitService lawSuitService;
+    private final FileService fileService;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Object>> uploadFile(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
@@ -42,11 +43,11 @@ public class LawSuitController {
     @GetMapping("/download/{filename}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
         try{
-            Resource resource = lawSuitService.downloadFile(filename);
+            Resource resource = fileService.loadFileAsResource(filename);
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
             return ResponseEntity.ok().headers(headers).body(resource);
-        } catch (MalformedURLException e) {
+        } catch (FileException e) {
             log.info("File download failed", e);
             throw new FileException(ErrorCode.FILE_NOT_FOUND);
         }
