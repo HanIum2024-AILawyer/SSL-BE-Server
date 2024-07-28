@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
 
 @Slf4j
 @RestController
@@ -79,6 +82,12 @@ public class LawSuitController {
             log.info("File download failed", e);
             throw new FileException(ErrorCode.FILE_NOT_FOUND);
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Object>> getLawSuitList(HttpServletRequest request) {
+        List<LawSuitResponse> lawSuitList = lawSuitService.getLawSuitList(request);
+        return ApiResponse.onSuccess(SuccessCode._OK, lawSuitList);
     }
 
 

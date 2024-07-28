@@ -4,6 +4,7 @@ import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
+import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.util.JwtUtil;
@@ -21,12 +22,16 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LawSuitService {
     private final FileService fileService;
+    private final UserService userService;
     private final JwtUtil jwtUtil;
     private final LawSuitRepository lawSuitRepository;
 
@@ -60,5 +65,16 @@ public class LawSuitService {
         LawSuit lawSuit = lawSuitRepository.findByStoredFileName(storedFileName)
                 .orElseThrow(() -> new FileException(ErrorCode.FILE_NOT_FOUND));
         return lawSuit.getOriginalFileName();
+    }
+
+    public List<LawSuitResponse> getLawSuitList(HttpServletRequest request) {
+        User user = userService.getUserInfo(request);
+        Long userId = user.getId();
+        List<LawSuit> lawSuitList = lawSuitRepository.findAllByUserIdOrderByIdDesc(userId);
+
+        List<LawSuitResponse> lawSuitResponseList = lawSuitList.stream().map(
+                LawSuitResponse::of
+        ).toList();
+        return lawSuitResponseList;
     }
 }
