@@ -5,6 +5,7 @@ import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
 import com.lawProject.SSL.domain.user.application.UserService;
+import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.util.JwtUtil;
@@ -25,9 +26,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
+import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.UpdateFileNameLawSuitRequest;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class LawSuitService {
     private final FileService fileService;
@@ -76,5 +79,33 @@ public class LawSuitService {
                 LawSuitResponse::of
         ).toList();
         return lawSuitResponseList;
+    }
+
+    @Transactional
+    public void changeOriginalFileName(HttpServletRequest request, UpdateFileNameLawSuitRequest changeLawSuitRequest) {
+        LawSuit lawSuit = findLawSuitById(changeLawSuitRequest.lawSuitId());
+        String originalFileName = lawSuit.getOriginalFileName();
+        User user = userService.getUserInfo(request);
+        if (!lawSuit.getUser().getId().equals(user.getId())) {
+            throw new UserException(ErrorCode.USER_MISMATCH);
+        }
+        String newOriginalFileName = generateNewOriginalFileName(originalFileName, changeLawSuitRequest.updateOriginalFileName());
+        lawSuit.setOriginalFileName(newOriginalFileName);
+    }
+
+    private String generateNewOriginalFileName(String originalFileName, String newFileNameWithoutExt) {
+        String extension = extractFileExtension(originalFileName);
+        return newFileNameWithoutExt + "." + extension;
+    }
+
+    private String extractFileExtension(String filename) {
+        int pos = filename.lastIndexOf(".");
+        return filename.substring(pos + 1);
+    }
+
+    public LawSuit findLawSuitById(Long id) {
+        return lawSuitRepository.findById(id).orElseThrow(
+                () -> new FileException(ErrorCode.FILE_NOT_FOUND)
+        );
     }
 }

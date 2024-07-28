@@ -1,6 +1,7 @@
 package com.lawProject.SSL.domain.lawsuit.api;
 
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
+import com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.lawsuit.service.LawSuitService;
@@ -23,6 +24,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.*;
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
 
 @Slf4j
@@ -90,6 +92,11 @@ public class LawSuitController {
         return ApiResponse.onSuccess(SuccessCode._OK, lawSuitList);
     }
 
+    @PatchMapping
+    public ResponseEntity<ApiResponse<Object>> changeOriginalFileName(HttpServletRequest request, @RequestBody UpdateFileNameLawSuitRequest updateFileNameLawSuitRequest) {
+        lawSuitService.changeOriginalFileName(request, updateFileNameLawSuitRequest);
+        return ApiResponse.onSuccess(SuccessCode._OK);
+    }
 
     private boolean isWordFile(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();

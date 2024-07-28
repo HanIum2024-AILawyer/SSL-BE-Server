@@ -7,6 +7,17 @@ import java.time.LocalDateTime;
 
 public class lawSuitDto {
     /**
+     * Request
+     */
+    public record UpdateFileNameLawSuitRequest(
+            Long lawSuitId,
+            String updateOriginalFileName
+    ) {
+    }
+
+
+
+    /**
      * Response
      */
     @Builder

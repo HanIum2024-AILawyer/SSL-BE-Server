@@ -36,6 +36,10 @@ public class LawSuit extends BaseEntity {
         this.expireTime = expireTime;
     }
 
+    public void setOriginalFileName(String newOriginalFileName) {
+        this.originalFileName = newOriginalFileName;
+    }
+
     /* 연관관계 메서드 */
     public static LawSuit ofUser(User user, FileStorageResult fileStorageResult) {
         return LawSuit.builder()
