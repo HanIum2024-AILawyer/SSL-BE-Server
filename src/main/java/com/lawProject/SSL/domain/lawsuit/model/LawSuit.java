@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.lawsuit.model;
 
+import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
@@ -20,7 +21,9 @@ public class LawSuit extends BaseEntity {
     @Column(name = "law_suit_id")
     private Long id;
 
-    private String fileUrl;
+    private String storedFileName;
+
+    private String originalFileName;
 
     private LocalDateTime expireTime;
 
@@ -34,10 +37,11 @@ public class LawSuit extends BaseEntity {
     }
 
     /* 연관관계 메서드 */
-    public static LawSuit ofUser(User user, String fileUrl) {
+    public static LawSuit ofUser(User user, FileStorageResult fileStorageResult) {
         return LawSuit.builder()
                 .user(user)
-                .fileUrl(fileUrl)
+                .storedFileName(fileStorageResult.getStoredFileName())
+                .originalFileName(fileStorageResult.getOriginalFileName())
                 .build();
     }
 }

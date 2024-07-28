@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.lawsuit.service;
 
+import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
@@ -30,15 +31,15 @@ public class LawSuitService {
     private final LawSuitRepository lawSuitRepository;
 
     @Transactional
-    public String uploadFile(MultipartFile file, HttpServletRequest request) throws IOException {
-        String fileUrl = fileService.storeFile(file);
+    public FileStorageResult uploadFile(MultipartFile file, HttpServletRequest request) throws IOException {
+        FileStorageResult fileStorageResult = fileService.storeFile(file);
         User user = jwtUtil.getUserFromRequest(request);
 
         if (file != null && !file.isEmpty()) {
-            LawSuit lawSuit = LawSuit.ofUser(user, fileUrl);
+            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
             lawSuit.setExpireTime(LocalDateTime.now().plusDays(7));
             lawSuitRepository.save(lawSuit);
-            return fileUrl;
+            return fileStorageResult;
         }
 
         throw new FileException(ErrorCode.FILE_NOT_UPLOADED);
@@ -53,7 +54,11 @@ public class LawSuitService {
         } else {
             throw new MalformedURLException("File not found " + filename);
         }
+    }
 
-
+    public String getOriginalFileName(String storedFileName) {
+        LawSuit lawSuit = lawSuitRepository.findByStoredFileName(storedFileName)
+                .orElseThrow(() -> new FileException(ErrorCode.FILE_NOT_FOUND));
+        return lawSuit.getOriginalFileName();
     }
 }
