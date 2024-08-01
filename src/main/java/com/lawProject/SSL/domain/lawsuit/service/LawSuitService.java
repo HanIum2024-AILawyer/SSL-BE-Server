@@ -1,6 +1,7 @@
 package com.lawProject.SSL.domain.lawsuit.service;
 
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
+import com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
@@ -38,6 +39,7 @@ public class LawSuitService {
     private final JwtUtil jwtUtil;
     private final LawSuitRepository lawSuitRepository;
 
+    /* 소송장 업로드 메서드 */
     @Transactional
     public FileStorageResult uploadFile(MultipartFile file, HttpServletRequest request) throws IOException {
         FileStorageResult fileStorageResult = fileService.storeFile(file);
@@ -53,6 +55,7 @@ public class LawSuitService {
         throw new FileException(ErrorCode.FILE_NOT_UPLOADED);
     }
 
+    /* 소송장 다운로드 매서드 */
     public Resource downloadFile(String filename) throws MalformedURLException {
         Path filePath = Paths.get(fileService.getFullPath(filename)).toAbsolutePath().normalize();
         Resource resource = new UrlResource(filePath.toUri());
@@ -70,6 +73,7 @@ public class LawSuitService {
         return lawSuit.getOriginalFileName();
     }
 
+    /* 소송장 목록 조회 메서드 */
     public List<LawSuitResponse> getLawSuitList(HttpServletRequest request) {
         User user = userService.getUserInfo(request);
         Long userId = user.getId();
@@ -81,6 +85,7 @@ public class LawSuitService {
         return lawSuitResponseList;
     }
 
+    /* 소송장 이름 변경 메서드 */
     @Transactional
     public void changeOriginalFileName(HttpServletRequest request, UpdateFileNameLawSuitRequest changeLawSuitRequest) {
         LawSuit lawSuit = findLawSuitById(changeLawSuitRequest.lawSuitId());
@@ -107,5 +112,14 @@ public class LawSuitService {
         return lawSuitRepository.findById(id).orElseThrow(
                 () -> new FileException(ErrorCode.FILE_NOT_FOUND)
         );
+    }
+
+    /* 소송장 삭제 메서드 */
+    @Transactional
+    public void deleteSuit(lawSuitDto.DeleteSuitRequest deleteSuitRequest) {
+        List<Long> lawSuitIdList = deleteSuitRequest.lawSuitIdList();
+        if (lawSuitIdList != null && !lawSuitIdList.isEmpty()) {
+            lawSuitRepository.deleteAllById(lawSuitIdList);
+        }
     }
 }

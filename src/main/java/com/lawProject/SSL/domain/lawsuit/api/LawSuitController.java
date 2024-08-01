@@ -1,7 +1,6 @@
 package com.lawProject.SSL.domain.lawsuit.api;
 
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
-import com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.lawsuit.service.LawSuitService;
@@ -25,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.*;
-import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
 
 @Slf4j
 @RestController
@@ -35,6 +33,7 @@ public class LawSuitController {
     private final LawSuitService lawSuitService;
     private final FileService fileService;
 
+    /* 소송장 업로드 */
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Object>> uploadFile(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
         try {
@@ -50,6 +49,7 @@ public class LawSuitController {
         }
     }
 
+    /* 소송장 다운로드 */
     @GetMapping("/download/{storedFileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String storedFileName) {
         try {
@@ -86,15 +86,24 @@ public class LawSuitController {
         }
     }
 
+    /* 소송장 목록 조회 */
     @GetMapping
     public ResponseEntity<ApiResponse<Object>> getLawSuitList(HttpServletRequest request) {
         List<LawSuitResponse> lawSuitList = lawSuitService.getLawSuitList(request);
         return ApiResponse.onSuccess(SuccessCode._OK, lawSuitList);
     }
 
+    /* 소송장 이름 변경 */
     @PatchMapping
     public ResponseEntity<ApiResponse<Object>> changeOriginalFileName(HttpServletRequest request, @RequestBody UpdateFileNameLawSuitRequest updateFileNameLawSuitRequest) {
         lawSuitService.changeOriginalFileName(request, updateFileNameLawSuitRequest);
+        return ApiResponse.onSuccess(SuccessCode._OK);
+    }
+
+    /* 소송장 삭제 */
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Object>> deleteSuit(HttpServletRequest request, @RequestBody DeleteSuitRequest deleteSuitRequest) {
+        lawSuitService.deleteSuit(deleteSuitRequest);
         return ApiResponse.onSuccess(SuccessCode._OK);
     }
 

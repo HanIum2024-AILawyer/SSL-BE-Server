@@ -4,6 +4,7 @@ import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class lawSuitDto {
     /**
@@ -14,6 +15,12 @@ public class lawSuitDto {
             String updateOriginalFileName
     ) {
     }
+
+    public record DeleteSuitRequest(
+            List<Long> lawSuitIdList
+    ) {
+    }
+
 
 
 
