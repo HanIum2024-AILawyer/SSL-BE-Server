@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.lawsuit.service;
 
+import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.annotation.PostConstruct;
@@ -44,33 +45,33 @@ public class FileService {
         return this.fileStorageLocation.resolve(filename).toString();
     }
 
-    public List<String> storeFiles(List<MultipartFile> multipartFiles) {
-        List<String> fileUrls = new ArrayList<>();
+    public List<FileStorageResult> storeFiles(List<MultipartFile> multipartFiles) {
+        List<FileStorageResult> fileStorageResults = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFile.isEmpty()) {
-                fileUrls.add(storeFile(multipartFile)); //파일의 이름 정보가 들어간 UploadFile 객체를 storeFileResult에 넣어줌
+                fileStorageResults.add(storeFile(multipartFile)); //파일의 이름 정보가 들어간 UploadFile 객체를 storeFileResult에 넣어줌
             }
         }
-        return fileUrls;
+        return fileStorageResults;
 
     }
 
-    public String storeFile(MultipartFile multipartFile) {
+    public FileStorageResult storeFile(MultipartFile multipartFile) {
         if (multipartFile.isEmpty()) {
-            throw new IllegalArgumentException("Empty file.");
+            throw new FileException(ErrorCode.FILE_EMPTY);
         }
 
-        String originalFilename = multipartFile.getOriginalFilename();
-        String fileName = createServerFileName(originalFilename); //랜덤의 uuid를 추가한 파일 이름
-        String fullPath = getFullPath(fileName);
+        String originalFileName = multipartFile.getOriginalFilename();
+        String storedFileName = createServerFileName(originalFileName); //랜덤의 uuid를 추가한 파일 이름
+
         try {
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Path targetLocation = this.fileStorageLocation.resolve(storedFileName);
             Files.copy(multipartFile.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new FileException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
-        return fileName;
+        return new FileStorageResult(originalFileName, storedFileName);
     }
 
     public Resource loadFileAsResource(String fileName) {
