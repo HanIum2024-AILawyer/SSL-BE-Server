@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
                                 .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 )
+                .logout(oauth -> oauth.logoutSuccessUrl("/login"))
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
