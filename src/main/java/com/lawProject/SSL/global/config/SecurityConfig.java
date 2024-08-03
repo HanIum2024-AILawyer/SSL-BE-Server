@@ -1,10 +1,12 @@
 package com.lawProject.SSL.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
+import com.lawProject.SSL.global.oauth.handler.OAuthLogoutHandler;
 import com.lawProject.SSL.global.oauth.service.CustomOAuth2UserService;
 import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
 import com.lawProject.SSL.global.util.JwtUtil;
@@ -32,10 +34,12 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
     private final JwtUtil jwtService;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuthLogoutHandler oAuthLogoutHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -58,6 +62,14 @@ public class SecurityConfig {
                                 .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
                                 .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 )
+                .logout(logout ->
+                        logout
+                                .logoutUrl("/logout")
+                                .addLogoutHandler(oAuthLogoutHandler)
+                                .logoutSuccessHandler(oAuthLogoutHandler)
+                                .logoutSuccessUrl("/login")
+                                .invalidateHttpSession(true)
+                )
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
@@ -65,7 +77,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
 
-        return new JwtAuthenticationProcessingFilter(jwtService, userRepository, refreshTokenRepository);
+        return new JwtAuthenticationProcessingFilter(jwtService, userRepository, refreshTokenRepository, blacklistedTokenRepository);
     }
 
     @Bean
