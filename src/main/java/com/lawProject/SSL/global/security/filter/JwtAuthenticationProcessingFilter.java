@@ -1,5 +1,6 @@
 package com.lawProject.SSL.global.security.filter;
 
+import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
@@ -28,6 +29,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -39,9 +41,18 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("Received request URI: " + request.getRequestURI());
-        if (request.getRequestURI().equals(NO_CHECK_URL)) {
+        String requestURI = request.getRequestURI();
+        System.out.println("Received request URI: " + requestURI);
+        if (requestURI.equals(NO_CHECK_URL)) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        String accessToken = jwtUtil.extractAccessToken(request).orElse(null);
+
+        if (accessToken == null || blacklistedTokenRepository.existsByToken(accessToken)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid or missing token");
             return;
         }
 
