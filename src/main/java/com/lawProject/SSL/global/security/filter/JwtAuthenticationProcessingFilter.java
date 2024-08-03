@@ -48,14 +48,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = jwtUtil.extractAccessToken(request).orElse(null);
-
-        if (accessToken == null || blacklistedTokenRepository.existsByToken(accessToken)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid or missing token");
-            return;
-        }
-
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
