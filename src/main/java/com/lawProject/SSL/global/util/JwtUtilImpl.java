@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.token.exception.TokenException;
+import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
 import com.lawProject.SSL.domain.user.dao.UserRepository;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
@@ -42,6 +43,7 @@ public class JwtUtilImpl implements JwtUtil {
     private String refreshHeader;
 
     private final UserRepository userRepository;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
     private ObjectMapper objectMapper;
 
 
@@ -129,6 +131,10 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public boolean isTokenValid(String token) {
         try {
+            if (blacklistedTokenRepository.existsByToken(token)) {
+                log.error("Token is blacklisted");
+                return false;
+            }
             JWT.require(Algorithm.HMAC512(secret)).build().verify(token);
             return true;
         } catch (Exception e) {
