@@ -60,7 +60,12 @@ public enum ErrorCode implements BaseCode{
     /**
      * ChatRoom
      */
-    ROOM_NOT_FOUND(NOT_FOUND, "R001", "존재하지 않는 채팅방입니다.");
+    ROOM_NOT_FOUND(NOT_FOUND, "R001", "존재하지 않는 채팅방입니다."),
+
+    /**
+     * Notification
+     */
+    NOTIFICATION_NOT_FOUND(NOT_FOUND, "N001", "존재하지 않는 문의글입니다.");
 
 
     private final HttpStatus httpStatus;

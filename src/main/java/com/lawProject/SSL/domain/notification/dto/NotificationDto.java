@@ -3,6 +3,7 @@ package com.lawProject.SSL.domain.notification.dto;
 import com.lawProject.SSL.domain.notification.model.Notification;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 public class NotificationDto {
 
@@ -20,6 +21,26 @@ public class NotificationDto {
                     .title(title)
                     .content(title)
                     .user(user)
+                    .build();
+        }
+    }
+
+    /**
+     * Response
+     */
+    @Builder
+    public record NotificationDetailResponse(
+            String title,
+            String content,
+            String answer,
+            String userName
+    ) {
+        public static NotificationDetailResponse of(Notification notification) {
+            return NotificationDetailResponse.builder()
+                    .title(notification.getTitle())
+                    .content(notification.getContent())
+                    .answer(notification.getAnswer())
+                    .userName(notification.getUser().getName())
                     .build();
         }
     }
