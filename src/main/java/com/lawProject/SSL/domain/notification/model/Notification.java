@@ -5,6 +5,7 @@ import com.lawProject.SSL.domain.user.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,12 +27,19 @@ public class Notification extends BaseEntity {
     @NotNull
     private String content;
 
-    private int views;
+    private String answer;
 
-    @NotNull
-    private NotificationType notificationType;
+//    @NotNull
+//    private NotificationType notificationType;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Builder
+    public Notification(String title, String content, User user) {
+        this.title = title;
+        this.content = content;
+        this.user = user;
+    }
 }
