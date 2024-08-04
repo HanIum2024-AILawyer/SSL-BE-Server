@@ -29,6 +29,8 @@ public class Notification extends BaseEntity {
 
     private String answer;
 
+    private boolean isAnswer;
+
 //    @NotNull
 //    private NotificationType notificationType;
 
