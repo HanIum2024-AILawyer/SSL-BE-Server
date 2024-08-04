@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 
 
@@ -50,6 +52,12 @@ public class InQueryController {
     }
 
     /* 나의 Q&A */
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<Object>> myInQuery(HttpServletRequest request) {
+        List<InQueryListResponse> myInQuery = inQueryService.getMyInQuery(request);
+
+        return ApiResponse.onSuccess(SuccessCode._OK, myInQuery);
+    }
 
     /* Q&A 답글 달기 */
 }

@@ -55,6 +55,17 @@ public class InQueryService {
         return new PageImpl<>(inQueryListResponses, pageable, inQueryPages.getTotalElements());
     }
 
+
+    /* 나의 Q&A 목록 조회 메서드 */
+    public List<InQueryListResponse> getMyInQuery(HttpServletRequest request) {
+        User user = userService.getUserInfo(request);
+        List<InQueryListResponse> myInQueryListResponse = user.getInQueryList().stream()
+                .map(InQueryListResponse::of)
+                .toList();
+
+        return myInQueryListResponse;
+    }
+
     /* Using Method */
     public InQuery findInQueryById(Long id) {
         return inQueryRepository.findById(id)
