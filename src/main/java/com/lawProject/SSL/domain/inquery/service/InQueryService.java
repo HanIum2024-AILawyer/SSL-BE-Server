@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,12 +22,14 @@ import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class InQueryService {
     private InQueryRepository inQueryRepository;
     private UserService userService;
 
     /* Q&A 작성 메서드 */
+    @Transactional
     public void write(HttpServletRequest request, InQueryWriteRequest inQueryWriteRequest) {
         User user = userService.getUserInfo(request);
         InQuery inQuery = inQueryWriteRequest.toEntity(user);
@@ -56,11 +59,5 @@ public class InQueryService {
     public InQuery findInQueryById(Long id) {
         return inQueryRepository.findById(id)
                 .orElseThrow(() -> new InQueryException(ErrorCode.INQUERY_NOT_FOUND));
-    }
-
-    public List<InQuery> getMyInQuery(HttpServletRequest request) {
-        User user = userService.getUserInfo(request);
-        List<InQuery> inQueryList = user.getInQueryList();
-        return inQueryList;
     }
 }
