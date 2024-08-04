@@ -1,7 +1,7 @@
 package com.lawProject.SSL.domain.user.model;
 
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
-import com.lawProject.SSL.domain.notification.model.Notification;
+import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -44,7 +44,7 @@ public class User extends BaseEntity {
     private List<LawSuit> lawSuitList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = LAZY)
-    private List<Notification> notificationList = new ArrayList<>();
+    private List<InQuery> inQueryList = new ArrayList<>();
 
     @Builder
     public User(String userId, String name, String provider, String providerId) {
@@ -54,7 +54,7 @@ public class User extends BaseEntity {
         this.providerId = providerId;
     }
 
-    public void addNotification(Notification notification) {
-        this.notificationList.add(notification);
+    public void addInQuery(InQuery inQuery) {
+        this.inQueryList.add(inQuery);
     }
 }
