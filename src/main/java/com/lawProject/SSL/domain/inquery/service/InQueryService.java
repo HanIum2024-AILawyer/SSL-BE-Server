@@ -31,6 +31,7 @@ public class InQueryService {
         User user = userService.getUserInfo(request);
         InQuery inQuery = inQueryWriteRequest.toEntity(user);
         inQueryRepository.save(inQuery);
+        user.addInQuery(inQuery);
     }
 
     /* Q&A 상세 페이지 메서드 */
@@ -55,5 +56,11 @@ public class InQueryService {
     public InQuery findInQueryById(Long id) {
         return inQueryRepository.findById(id)
                 .orElseThrow(() -> new InQueryException(ErrorCode.INQUERY_NOT_FOUND));
+    }
+
+    public List<InQuery> getMyInQuery(HttpServletRequest request) {
+        User user = userService.getUserInfo(request);
+        List<InQuery> inQueryList = user.getInQueryList();
+        return inQueryList;
     }
 }
