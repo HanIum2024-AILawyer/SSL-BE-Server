@@ -43,5 +43,6 @@ public class Notification extends BaseEntity {
         this.title = title;
         this.content = content;
         this.user = user;
+        this.isAnswer = false;
     }
 }

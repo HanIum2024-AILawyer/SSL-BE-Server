@@ -44,5 +44,21 @@ public class NotificationDto {
                     .build();
         }
     }
+
+    @Builder
+    public record NotificationListResponse(
+            String title,
+            String content,
+            boolean isAnswer
+    ) {
+        public static NotificationListResponse of(Notification notification) {
+            return NotificationListResponse.builder()
+                    .title(notification.getTitle())
+                    .content(notification.getContent())
+                    .isAnswer(notification.isAnswer())
+                    .build();
+        }
+    }
+
 }
 

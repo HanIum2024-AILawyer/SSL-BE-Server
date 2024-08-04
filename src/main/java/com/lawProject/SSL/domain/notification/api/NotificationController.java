@@ -7,11 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.lawProject.SSL.domain.notification.dto.NotificationDto.NotificationDetailResponse;
-import static com.lawProject.SSL.domain.notification.dto.NotificationDto.NotificationWriteRequest;
+import static com.lawProject.SSL.domain.notification.dto.NotificationDto.*;
 
 @Slf4j
 @RestController
@@ -38,6 +38,15 @@ public class NotificationController {
     }
 
     /* Q&A 목록 조회 */
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<Object>> getNotificationList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        PageImpl<NotificationListResponse> notificationListResponse = notificationService.getNotificationList(page, size);
+
+        return ApiResponse.onSuccess(SuccessCode._OK, notificationListResponse);
+    }
 
     /* 나의 Q&A */
 
