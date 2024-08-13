@@ -1,7 +1,7 @@
 package com.lawProject.SSL.domain.image.model;
 
+import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
-import com.lawProject.SSL.domain.notification.model.Notification;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +21,8 @@ public class Image {
     private String imageUrl;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "notification_id")
-    private Notification notification;
+    @JoinColumn(name = "inquery_id")
+    private InQuery inQuery;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "lawyer_id")

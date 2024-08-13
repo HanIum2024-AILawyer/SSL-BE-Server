@@ -1,6 +1,7 @@
 package com.lawProject.SSL.domain.user.model;
 
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
+import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,11 +43,18 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
     private List<LawSuit> lawSuitList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = LAZY)
+    private List<InQuery> inQueryList = new ArrayList<>();
+
     @Builder
     public User(String userId, String name, String provider, String providerId) {
         this.userId = userId;
         this.name = name;
         this.provider = provider;
         this.providerId = providerId;
+    }
+
+    public void addInQuery(InQuery inQuery) {
+        this.inQueryList.add(inQuery);
     }
 }
