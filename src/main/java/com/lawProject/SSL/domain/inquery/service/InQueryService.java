@@ -4,9 +4,12 @@ import com.lawProject.SSL.domain.inquery.dao.InQueryRepository;
 import com.lawProject.SSL.domain.inquery.exception.InQueryException;
 import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.user.application.UserService;
+import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.domain.user.model.UserRole;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,8 +28,8 @@ import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class InQueryService {
-    private InQueryRepository inQueryRepository;
-    private UserService userService;
+    private final InQueryRepository inQueryRepository;
+    private final UserService userService;
 
     /* Q&A 작성 메서드 */
     @Transactional
@@ -64,6 +67,20 @@ public class InQueryService {
                 .toList();
 
         return myInQueryListResponse;
+    }
+
+    @Transactional
+    /* 문의글 답변 달기 메서드
+    * 역할이 Admin 사용자만 가능 */
+    public void answer(HttpServletRequest request, @Valid InQueryAnswerRequest inQueryAnswerRequest) {
+        // 역할이 Admin이 맞는지 2차 검증
+        User admin = userService.getUserInfo(request);
+        if (!admin.getRole().equals(UserRole.ADMIN)) {
+            throw new UserException(ErrorCode._FORBIDDEN);
+        }
+
+        InQuery inQuery = findInQueryById(inQueryAnswerRequest.id());
+        inQuery.setAnswer(inQueryAnswerRequest.answer());
     }
 
     /* Using Method */

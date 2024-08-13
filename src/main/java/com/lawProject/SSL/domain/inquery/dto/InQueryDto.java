@@ -3,6 +3,7 @@ package com.lawProject.SSL.domain.inquery.dto;
 import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.user.model.User;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 public class InQueryDto {
@@ -19,10 +20,20 @@ public class InQueryDto {
         public InQuery toEntity(User user) {
             return InQuery.builder()
                     .title(title)
-                    .content(title)
+                    .content(content)
                     .user(user)
                     .build();
         }
+    }
+
+    public record InQueryAnswerRequest(
+            @Positive
+            @NotNull
+            Long id,
+            @NotNull
+            String answer
+    ) {
+
     }
 
     /**
