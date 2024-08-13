@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,21 +39,18 @@ public class InQueryController {
         return ApiResponse.onSuccess(SuccessCode._OK, inQueryDetail);
     }
 
-    /* Q&A 목록 조회 */
-    @GetMapping("/list")
-    public ResponseEntity<ApiResponse<Object>> getInQueryList(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
-    ) {
-        PageImpl<InQueryListResponse> inQueryListResponse = inQueryService.getInQueryList(page, size);
+    /* 나의 답변 대기 중인 Q&A 목록 */
+    @GetMapping("/my/pending")
+    public ResponseEntity<ApiResponse<Object>> getMyPendingInquiries(HttpServletRequest request) {
+        List<InQueryListResponse> myInQuery = inQueryService.getMyInQuery(request, false);
 
-        return ApiResponse.onSuccess(SuccessCode._OK, inQueryListResponse);
+        return ApiResponse.onSuccess(SuccessCode._OK, myInQuery);
     }
 
-    /* 나의 Q&A */
-    @GetMapping("/my")
-    public ResponseEntity<ApiResponse<Object>> myInQuery(HttpServletRequest request) {
-        List<InQueryListResponse> myInQuery = inQueryService.getMyInQuery(request);
+    /* 나의 답변 된 Q&A 목록 */
+    @GetMapping("/my/answered")
+    public ResponseEntity<ApiResponse<Object>> getMyAnsweredInquiries(HttpServletRequest request) {
+        List<InQueryListResponse> myInQuery = inQueryService.getMyInQuery(request, true);
 
         return ApiResponse.onSuccess(SuccessCode._OK, myInQuery);
     }

@@ -60,14 +60,11 @@ public class InQueryDto {
     public record InQueryListResponse(
             String title,
             String content,
+            String answer,
             boolean isAnswer
     ) {
         public static InQueryListResponse of(InQuery inQuery) {
-            return InQueryListResponse.builder()
-                    .title(inQuery.getTitle())
-                    .content(inQuery.getContent())
-                    .isAnswer(inQuery.getIsAnswer())
-                    .build();
+            return new InQueryListResponse(inQuery.getTitle(), inQuery.getContent(), inQuery.getAnswer(), inQuery.getIsAnswer());
         }
     }
 }
