@@ -25,8 +25,8 @@ import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class InQueryService {
-    private InQueryRepository inQueryRepository;
-    private UserService userService;
+    private final InQueryRepository inQueryRepository;
+    private final UserService userService;
 
     /* Q&A 작성 메서드 */
     @Transactional

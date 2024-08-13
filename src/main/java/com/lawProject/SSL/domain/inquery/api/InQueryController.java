@@ -21,7 +21,7 @@ import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/inquery")
 public class InQueryController {
-    private InQueryService inQueryService;
+    private final InQueryService inQueryService;
 
     /* Q&A 작성 */
     @PostMapping
