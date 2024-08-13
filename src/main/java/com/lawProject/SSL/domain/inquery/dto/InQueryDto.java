@@ -19,7 +19,7 @@ public class InQueryDto {
         public InQuery toEntity(User user) {
             return InQuery.builder()
                     .title(title)
-                    .content(title)
+                    .content(content)
                     .user(user)
                     .build();
         }
