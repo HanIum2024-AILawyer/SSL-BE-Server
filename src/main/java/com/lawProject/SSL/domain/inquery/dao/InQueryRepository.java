@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InQueryRepository extends JpaRepository<InQuery, Long> {
     Page<InQuery> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<InQuery> findAllByIsAnswerOrderByCreatedAtDesc(boolean isAnswered, Pageable pageable);
 }

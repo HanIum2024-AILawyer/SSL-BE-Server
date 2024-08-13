@@ -46,13 +46,13 @@ public class InQueryService {
         return InQueryDetailResponse.of(inQuery);
     }
 
-    /* Q&A 목록 조회 메서드 */
-    public PageImpl<InQueryListResponse> getInQueryList(int page, int size) {
+    /* 어드민 Q&A 목록 조회 메서드 */
+    public PageImpl<AdminInQueryListResponse> getInQueryList(int page, int size, boolean isAnswered) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<InQuery> inQueryPages = inQueryRepository.findAllByOrderByCreatedAtDesc(pageable);
+        Page<InQuery> inQueryPages = inQueryRepository.findAllByIsAnswerOrderByCreatedAtDesc(isAnswered, pageable);
 
-        List<InQueryListResponse> inQueryListResponses = inQueryPages.stream()
-                .map(InQueryListResponse::of)
+        List<AdminInQueryListResponse> inQueryListResponses = inQueryPages.stream()
+                .map(AdminInQueryListResponse::of)
                 .toList();
 
         return new PageImpl<>(inQueryListResponses, pageable, inQueryPages.getTotalElements());
@@ -60,14 +60,17 @@ public class InQueryService {
 
 
     /* 나의 Q&A 목록 조회 메서드 */
-    public List<InQueryListResponse> getMyInQuery(HttpServletRequest request) {
+    public List<InQueryListResponse> getMyInQuery(HttpServletRequest request, boolean isAnswered) {
         User user = userService.getUserInfo(request);
         List<InQueryListResponse> myInQueryListResponse = user.getInQueryList().stream()
+                .filter(i -> i.getIsAnswer() == isAnswered)  // 매개변수에 따라 필터링
                 .map(InQueryListResponse::of)
                 .toList();
 
         return myInQueryListResponse;
     }
+
+
 
     @Transactional
     /* 문의글 답변 달기 메서드

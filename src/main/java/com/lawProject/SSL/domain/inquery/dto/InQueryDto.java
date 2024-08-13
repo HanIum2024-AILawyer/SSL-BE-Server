@@ -58,14 +58,39 @@ public class InQueryDto {
 
     @Builder
     public record InQueryListResponse(
+            Long id,
             String title,
             String content,
+            String answer,
             boolean isAnswer
     ) {
         public static InQueryListResponse of(InQuery inQuery) {
             return InQueryListResponse.builder()
+                    .id(inQuery.getId())
                     .title(inQuery.getTitle())
                     .content(inQuery.getContent())
+                    .answer(inQuery.getAnswer())
+                    .isAnswer(inQuery.getIsAnswer())
+                    .build();
+        }
+    }
+
+    @Builder
+    public record AdminInQueryListResponse(
+            Long id,
+            String title,
+            String userName,
+            String content,
+            String answer,
+            boolean isAnswer
+    ) {
+        public static AdminInQueryListResponse of(InQuery inQuery) {
+            return AdminInQueryListResponse.builder()
+                    .id(inQuery.getId())
+                    .title(inQuery.getTitle())
+                    .userName(inQuery.getUser().getName())
+                    .content(inQuery.getContent())
+                    .answer(inQuery.getAnswer())
                     .isAnswer(inQuery.getIsAnswer())
                     .build();
         }
