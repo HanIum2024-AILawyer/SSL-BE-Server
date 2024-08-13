@@ -46,7 +46,13 @@ public class InQuery extends BaseEntity {
         this.isAnswer = false;
     }
 
+    /* Using Method */
     public boolean getIsAnswer() {
         return this.isAnswer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+        this.isAnswer = true;
     }
 }

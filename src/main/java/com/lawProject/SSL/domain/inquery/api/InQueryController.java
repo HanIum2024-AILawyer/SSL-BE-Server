@@ -58,6 +58,4 @@ public class InQueryController {
 
         return ApiResponse.onSuccess(SuccessCode._OK, myInQuery);
     }
-
-    /* Q&A 답글 달기 */
 }
