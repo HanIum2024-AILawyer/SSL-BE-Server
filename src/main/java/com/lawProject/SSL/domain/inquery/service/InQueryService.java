@@ -46,13 +46,13 @@ public class InQueryService {
         return InQueryDetailResponse.of(inQuery);
     }
 
-    /* Q&A 목록 조회 메서드 */
-    public PageImpl<InQueryListResponse> getInQueryList(int page, int size, boolean isAnswered) {
+    /* 어드민 Q&A 목록 조회 메서드 */
+    public PageImpl<AdminInQueryListResponse> getInQueryList(int page, int size, boolean isAnswered) {
         Pageable pageable = PageRequest.of(page, size);
         Page<InQuery> inQueryPages = inQueryRepository.findAllByIsAnswerOrderByCreatedAtDesc(isAnswered, pageable);
 
-        List<InQueryListResponse> inQueryListResponses = inQueryPages.stream()
-                .map(InQueryListResponse::of)
+        List<AdminInQueryListResponse> inQueryListResponses = inQueryPages.stream()
+                .map(AdminInQueryListResponse::of)
                 .toList();
 
         return new PageImpl<>(inQueryListResponses, pageable, inQueryPages.getTotalElements());
