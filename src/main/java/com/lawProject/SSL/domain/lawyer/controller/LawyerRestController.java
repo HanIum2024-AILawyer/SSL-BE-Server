@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.*;
@@ -27,7 +28,7 @@ public class LawyerRestController {
     @PostMapping("/admin/lawyers")
     public ResponseEntity<ApiResponse<Object>> createLawyer(@RequestPart(name = "request") LawyerCreateRequest request,
                                                             @RequestPart(name = "image") MultipartFile image
-                                                            ) {
+                                                            ) throws IOException {
         lawyerService.create(request, image);
 
         return ApiResponse.onSuccess(SuccessCode._CREATED);
@@ -56,9 +57,19 @@ public class LawyerRestController {
     public ResponseEntity<ApiResponse<Object>> updateLawyer(
             @PathVariable Long lawyerId,
             @RequestPart(name = "request") LawyerCreateRequest request,
-            @RequestPart(name = "image") MultipartFile image) {
+            @RequestPart(name = "image", required = false) MultipartFile image) {
 
         lawyerService.updateLawyer(lawyerId, request, image);
+
+        return ApiResponse.onSuccess(SuccessCode._OK);
+    }
+
+    /* 변호사 삭제, Admin */
+    @DeleteMapping("/admin/lawyers/{lawyerId}")
+    public ResponseEntity<ApiResponse<Object>> deleteLawyer(
+            @PathVariable Long lawyerId
+    ) {
+        lawyerService.delete(lawyerId);
 
         return ApiResponse.onSuccess(SuccessCode._OK);
     }
