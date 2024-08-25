@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/reissue/access-token").permitAll()
                         .requestMatchers("/api/v1/inquery/my").authenticated()
                         .requestMatchers("/api/v1/inquery/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점

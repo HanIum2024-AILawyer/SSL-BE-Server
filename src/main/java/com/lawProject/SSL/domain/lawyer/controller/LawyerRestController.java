@@ -15,28 +15,28 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/lawyers")
+@RequestMapping("/api/v1")
 public class LawyerRestController {
 
     private final LawyerService lawyerService;
 
-    // Create a new lawyer, 어드민 권한 부여 필요
-    @PostMapping
+    /* 변호사 등록, Admin */
+    @PostMapping("/admin/lawyers")
     public ResponseEntity<String> createLawyer(@Valid @RequestBody LawyerDto.LawyerForm form) {
         lawyerService.saveLawyer(form);
 
         return ResponseEntity.ok("success");
     }
 
-    // List all lawyers
-    @GetMapping
+    /* 변호사 목록 조회 */
+    @GetMapping("/lawyers")
     public ResponseEntity<List<LawyerDto.LawyerListResponse>> listAllLawyers() {
         List<LawyerDto.LawyerListResponse> lawyers = lawyerService.findLawyers();
         return ResponseEntity.ok(lawyers);
     }
 
-    // Get a specific lawyer
-    @GetMapping("/{lawyerId}")
+    /* 변호사 단일 조회 */
+    @GetMapping("/lawyers/{lawyerId}")
     public ResponseEntity<LawyerDto.LawyerDetailResponse> getLawyerById(@PathVariable Long lawyerId) {
         Lawyer lawyer = lawyerService.findById(lawyerId);
 
@@ -50,8 +50,8 @@ public class LawyerRestController {
         return ResponseEntity.ok(lawyerDetailResponse);
     }
 
-    // Update a lawyer
-    @PutMapping("/{lawyerId}")
+    /* 변호사 정보 수정 */
+    @PutMapping("/admin/lawyers/{lawyerId}")
     public ResponseEntity<String> updateLawyer(
             @PathVariable Long lawyerId,
             @Valid @RequestBody LawyerDto.LawyerForm form) {
@@ -60,22 +60,4 @@ public class LawyerRestController {
 
         return ResponseEntity.ok("success");
     }
-
-    // List all lawyers for admin
-    @GetMapping("/admin")
-    public ResponseEntity<List<LawyerDto.LawyerListResponse>> listAllLawyersForAdmin() {
-        List<LawyerDto.LawyerListResponse> lawyers = lawyerService.findLawyers();
-        return ResponseEntity.ok(lawyers);
-    }
-
-//    @GetMapping("/find") 변호사 검색 시스템
-//    public ResponseEntity<String> findLawyer(){
-//
-//    }
-//    @GetMapping() 태그 검색
-//    public  ResponseEntity<> findTag(){
-//
-//    }
 }
- //기본코드
-//서비스 추가 필요
