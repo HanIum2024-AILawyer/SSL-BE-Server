@@ -1,6 +1,5 @@
 package com.lawProject.SSL.domain.image.model;
 
-import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,10 +19,6 @@ public class Image {
 
     private String imageName;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "inquery_id")
-    private InQuery inQuery;
-
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "lawyer_id")
     private Lawyer lawyer;
@@ -34,5 +29,10 @@ public class Image {
                 .imageName(imageName)
                 .lawyer(lawyer)
                 .build();
+    }
+
+    /* Using Method */
+    public void updateImageName(String imageName) {
+        this.imageName = imageName;
     }
 }

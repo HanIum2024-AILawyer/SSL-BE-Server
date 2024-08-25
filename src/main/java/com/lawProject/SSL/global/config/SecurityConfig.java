@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/error", "/error/**", "/stomp/**", "/redis/**").permitAll() // 정적 자원 설정
                         .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/reissue/access-token").permitAll()
                         .requestMatchers("/api/v1/inquery/my").authenticated()
-                        .requestMatchers("/api/v1/inquery/**").permitAll()
+                        .requestMatchers("/api/v1/inquery/**", "/api/v1/lawyers", "/api/v1/lawyers/**").permitAll()
                         .requestMatchers("/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )

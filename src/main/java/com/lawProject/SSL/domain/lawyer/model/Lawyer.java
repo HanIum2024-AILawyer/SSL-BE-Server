@@ -2,21 +2,15 @@ package com.lawProject.SSL.domain.lawyer.model;
 
 import com.lawProject.SSL.domain.image.model.Image;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerCreateRequest;
 
 //변호사 정보
 
 @Getter
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 public class Lawyer {
     @Id
@@ -33,8 +27,12 @@ public class Lawyer {
     @Embedded
     private ContactInfo contactInfo; //연락 수단
 
-    @OneToOne(mappedBy = "lawyer", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Image image;
+
+    public Lawyer() {
+
+    }
 
     /* Using Method */
     public void update(Address address, ContactInfo contactInfo, LawyerCreateRequest request) {
@@ -56,6 +54,16 @@ public class Lawyer {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    @Builder
+    public Lawyer(String name, String businessRegistrationNumber, String intro, String lawyerTag, Address address, ContactInfo contactInfo) {
+        this.name = name;
+        this.businessRegistrationNumber = businessRegistrationNumber;
+        this.intro = intro;
+        this.lawyerTag = lawyerTag;
+        this.address = address;
+        this.contactInfo = contactInfo;
     }
 }
 
