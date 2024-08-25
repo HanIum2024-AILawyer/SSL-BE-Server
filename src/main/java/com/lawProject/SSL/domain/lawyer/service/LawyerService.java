@@ -74,9 +74,9 @@ public class LawyerService {
     public List<LawyerListResponse> findLawyers() {
         List<Lawyer> lawyers = lawyerRepository.findAll();
 
-        List<LawyerListResponse> lawyerListResponses = lawyers.stream().map(l -> LawyerListResponse.of(l)).toList();
-
-        return lawyerListResponses;
+        return lawyers.stream()
+                .map(LawyerListResponse::of)
+                .toList();
     }
 
     /**
@@ -107,6 +107,7 @@ public class LawyerService {
 
         Lawyer lawyer = Lawyer.builder()
                 .name(request.name())
+                .lawyerTag(request.tag())
                 .address(address)
                 .contactInfo(contactInfo)
                 .build();

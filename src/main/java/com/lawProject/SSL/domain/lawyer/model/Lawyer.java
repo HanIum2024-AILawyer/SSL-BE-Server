@@ -26,13 +26,12 @@ public class Lawyer {
     private String name;
     private String businessRegistrationNumber; //사업자 등록 번호
     private String intro; // 변호사 본인 소개
+    private String lawyerTag; // 변호사 분야
 
     @Embedded
     private Address address; //물리적 주소
     @Embedded
     private ContactInfo contactInfo; //연락 수단
-    @Embedded
-    private  LawyerTag lawyerTag;
 
     @OneToOne(mappedBy = "lawyer", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Image image;
@@ -41,6 +40,7 @@ public class Lawyer {
     public void update(Address address, ContactInfo contactInfo, LawyerCreateRequest request) {
         this.address = address;
         this.contactInfo = contactInfo;
+        this.lawyerTag = request.tag();
         this.name = request.name();
         this.businessRegistrationNumber = request.businessRegistrationNumber();
     }
@@ -48,6 +48,7 @@ public class Lawyer {
     public void updateWithImage(Address address, ContactInfo contactInfo, LawyerCreateRequest request, Image image) {
         this.address = address;
         this.contactInfo = contactInfo;
+        this.lawyerTag = request.tag();
         this.name = request.name();
         this.businessRegistrationNumber = request.businessRegistrationNumber();
         this.image = image;

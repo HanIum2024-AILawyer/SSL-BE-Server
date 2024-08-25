@@ -35,35 +35,31 @@ public class LawyerRestController {
 
     /* 변호사 목록 조회 */
     @GetMapping("/lawyers")
-    public ResponseEntity<List<LawyerListResponse>> listAllLawyers() {
+    public ResponseEntity<ApiResponse<Object>> listAllLawyers() {
         List<LawyerListResponse> lawyers = lawyerService.findLawyers();
-        return ResponseEntity.ok(lawyers);
+
+        return ApiResponse.onSuccess(SuccessCode._OK, lawyers);
     }
 
     /* 변호사 단일 조회 */
     @GetMapping("/lawyers/{lawyerId}")
-    public ResponseEntity<LawyerDetailResponse> getLawyerById(@PathVariable Long lawyerId) {
+    public ResponseEntity<ApiResponse<Object>> getLawyerById(@PathVariable Long lawyerId) {
         Lawyer lawyer = lawyerService.findById(lawyerId);
 
-        /*lawyerService.findById에서 null 값에 대한 예외 처리를 하기 때문에 불필요*/
-//        if (lawyer == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-        /* Lawyer 정보 반환 전 DTO로 변환 */
         LawyerDetailResponse lawyerDetailResponse = LawyerDetailResponse.of(lawyer);
 
-        return ResponseEntity.ok(lawyerDetailResponse);
+        return ApiResponse.onSuccess(SuccessCode._OK, lawyerDetailResponse);
     }
 
     /* 변호사 정보 수정 */
     @PutMapping("/admin/lawyers/{lawyerId}")
-    public ResponseEntity<String> updateLawyer(
+    public ResponseEntity<ApiResponse<Object>> updateLawyer(
             @PathVariable Long lawyerId,
             @RequestPart(name = "request") LawyerCreateRequest request,
             @RequestPart(name = "image") MultipartFile image) {
 
         lawyerService.updateLawyer(lawyerId, request, image);
 
-        return ResponseEntity.ok("success");
+        return ApiResponse.onSuccess(SuccessCode._OK);
     }
 }

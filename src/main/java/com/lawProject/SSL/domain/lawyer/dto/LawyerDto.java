@@ -18,6 +18,7 @@ public class LawyerDto {
     public record LawyerCreateRequest(
             String name,
             String intro,
+            String tag,
             String businessRegistrationNumber,
             String officeName,
             String officeAddress,
@@ -35,14 +36,15 @@ public class LawyerDto {
     public record LawyerListResponse(
             Long id,
             String name,
-            String tagName
-            // ... 그 외 변호사 목록에서 보여줄 정보들
+            String tagName,
+            String imageName
     ) {
         public static LawyerListResponse of(Lawyer lawyer) {
             return LawyerListResponse.builder()
                     .id(lawyer.getId())
                     .name(lawyer.getName())
-                    .tagName(lawyer.getLawyerTag().getTagName())
+                    .tagName(lawyer.getLawyerTag())
+                    .imageName(lawyer.getImage().getImageName())
                     .build();
         }
     }
@@ -69,7 +71,7 @@ public class LawyerDto {
                     .phoneNumber(lawyer.getContactInfo().getPhoneNumber())
                     .faxNumber(lawyer.getContactInfo().getFaxNumber())
                     .emailAddress(lawyer.getContactInfo().getEmailAddress())
-                    .tagName(lawyer.getLawyerTag().getTagName())
+                    .tagName(lawyer.getLawyerTag())
                     .build();
         }
     }
