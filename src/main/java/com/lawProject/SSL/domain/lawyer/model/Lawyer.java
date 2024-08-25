@@ -1,11 +1,13 @@
 package com.lawProject.SSL.domain.lawyer.model;
 
-import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
+import com.lawProject.SSL.domain.image.model.Image;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerCreateRequest;
 
 //변호사 정보
 
@@ -23,6 +25,7 @@ public class Lawyer {
     private Long id;
     private String name;
     private String businessRegistrationNumber; //사업자 등록 번호
+    private String intro; // 변호사 본인 소개
 
     @Embedded
     private Address address; //물리적 주소
@@ -31,36 +34,27 @@ public class Lawyer {
     @Embedded
     private  LawyerTag lawyerTag;
 
+    @OneToOne(mappedBy = "lawyer", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Image image;
+
     /* Using Method */
-    public void update(Address address, ContactInfo contactInfo, LawyerDto.LawyerForm form) {
+    public void update(Address address, ContactInfo contactInfo, LawyerCreateRequest request) {
         this.address = address;
         this.contactInfo = contactInfo;
-        this.name = form.name();
-        this.businessRegistrationNumber = form.businessRegistrationNumber();
+        this.name = request.name();
+        this.businessRegistrationNumber = request.businessRegistrationNumber();
+    }
+
+    public void updateWithImage(Address address, ContactInfo contactInfo, LawyerCreateRequest request, Image image) {
+        this.address = address;
+        this.contactInfo = contactInfo;
+        this.name = request.name();
+        this.businessRegistrationNumber = request.businessRegistrationNumber();
+        this.image = image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
     }
 }
-//기본코드
-//서비스 추가 필요
-
-/*
-비교용 코드
-@Getter
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Lawyer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lawyer_id")
-    private Long id;
-
-    @NotNull
-    private String name;
-
-//    @NotNull
-//    private Field field;
-
-    private String details;
-
-}
-*/
 

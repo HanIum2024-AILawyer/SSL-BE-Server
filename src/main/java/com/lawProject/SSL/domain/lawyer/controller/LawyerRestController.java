@@ -1,14 +1,17 @@
 package com.lawProject.SSL.domain.lawyer.controller;
 
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
-import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.service.LawyerService;
-import jakarta.validation.Valid;
+import com.lawProject.SSL.global.common.code.SuccessCode;
+import com.lawProject.SSL.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.*;
 
 
 //RestController 사용
@@ -22,22 +25,24 @@ public class LawyerRestController {
 
     /* 변호사 등록, Admin */
     @PostMapping("/admin/lawyers")
-    public ResponseEntity<String> createLawyer(@Valid @RequestBody LawyerDto.LawyerForm form) {
-        lawyerService.saveLawyer(form);
+    public ResponseEntity<ApiResponse<Object>> createLawyer(@RequestPart(name = "request") LawyerCreateRequest request,
+                                                            @RequestPart(name = "image") MultipartFile image
+                                                            ) {
+        lawyerService.create(request, image);
 
-        return ResponseEntity.ok("success");
+        return ApiResponse.onSuccess(SuccessCode._CREATED);
     }
 
     /* 변호사 목록 조회 */
     @GetMapping("/lawyers")
-    public ResponseEntity<List<LawyerDto.LawyerListResponse>> listAllLawyers() {
-        List<LawyerDto.LawyerListResponse> lawyers = lawyerService.findLawyers();
+    public ResponseEntity<List<LawyerListResponse>> listAllLawyers() {
+        List<LawyerListResponse> lawyers = lawyerService.findLawyers();
         return ResponseEntity.ok(lawyers);
     }
 
     /* 변호사 단일 조회 */
     @GetMapping("/lawyers/{lawyerId}")
-    public ResponseEntity<LawyerDto.LawyerDetailResponse> getLawyerById(@PathVariable Long lawyerId) {
+    public ResponseEntity<LawyerDetailResponse> getLawyerById(@PathVariable Long lawyerId) {
         Lawyer lawyer = lawyerService.findById(lawyerId);
 
         /*lawyerService.findById에서 null 값에 대한 예외 처리를 하기 때문에 불필요*/
@@ -45,7 +50,7 @@ public class LawyerRestController {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //        }
         /* Lawyer 정보 반환 전 DTO로 변환 */
-        LawyerDto.LawyerDetailResponse lawyerDetailResponse = LawyerDto.LawyerDetailResponse.of(lawyer);
+        LawyerDetailResponse lawyerDetailResponse = LawyerDetailResponse.of(lawyer);
 
         return ResponseEntity.ok(lawyerDetailResponse);
     }
@@ -54,9 +59,10 @@ public class LawyerRestController {
     @PutMapping("/admin/lawyers/{lawyerId}")
     public ResponseEntity<String> updateLawyer(
             @PathVariable Long lawyerId,
-            @Valid @RequestBody LawyerDto.LawyerForm form) {
+            @RequestPart(name = "request") LawyerCreateRequest request,
+            @RequestPart(name = "image") MultipartFile image) {
 
-        lawyerService.updateLawyer(lawyerId, form);
+        lawyerService.updateLawyer(lawyerId, request, image);
 
         return ResponseEntity.ok("success");
     }

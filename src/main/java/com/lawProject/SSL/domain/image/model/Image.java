@@ -18,17 +18,21 @@ public class Image {
     @Column(name = "image_id")
     private Long id;
 
-    private String imageUrl;
+    private String imageName;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "inquery_id")
     private InQuery inQuery;
 
-    @ManyToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "lawyer_id")
     private Lawyer lawyer;
 
-//    public static Image of(..., String imageUrl){
-//
-//    }
+    /* 연관관계 메서드 */
+    public static Image ofLawyer(Lawyer lawyer, String imageName){
+        return Image.builder()
+                .imageName(imageName)
+                .lawyer(lawyer)
+                .build();
+    }
 }

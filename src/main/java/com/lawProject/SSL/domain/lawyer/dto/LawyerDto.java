@@ -15,8 +15,9 @@ public class LawyerDto {
     /**
      * Request
      */
-    public record LawyerForm(
+    public record LawyerCreateRequest(
             String name,
+            String intro,
             String businessRegistrationNumber,
             String officeName,
             String officeAddress,

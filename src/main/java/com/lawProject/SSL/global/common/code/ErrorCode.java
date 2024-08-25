@@ -63,6 +63,10 @@ public enum ErrorCode implements BaseCode{
     ROOM_NOT_FOUND(NOT_FOUND, "R001", "존재하지 않는 채팅방입니다."),
 
     /**
+     * Lawyer
+     */
+    LAWYER_NOT_FOUND(NOT_FOUND, "L001", "존재하지 않는 변호사입니다."),
+    /**
      * InQuery
      */
     INQUERY_NOT_FOUND(NOT_FOUND, "N001", "존재하지 않는 문의글입니다.");
