@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @RequiredArgsConstructor
@@ -54,8 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/error", "/error/**", "/stomp/**", "/redis/**").permitAll() // 정적 자원 설정
                         .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/reissue/access-token").permitAll()
                         .requestMatchers("/api/v1/inquery/my").authenticated()
-                        .requestMatchers("/api/v1/inquery/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/v1/inquery/**", "/api/v1/lawyers", "/api/v1/lawyers/**").permitAll()
+                        .requestMatchers("/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
@@ -94,6 +95,9 @@ public class SecurityConfig {
             config.setAllowedMethods(Collections.singletonList("*"));
             config.setAllowedOriginPatterns(Collections.singletonList("*"));
             config.setAllowCredentials(true);
+            config.setAllowedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "Cache-Control", "Content-Type"));
+            /* 응답 헤더 설정 추가*/
+            config.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
             return config;
         };
     }

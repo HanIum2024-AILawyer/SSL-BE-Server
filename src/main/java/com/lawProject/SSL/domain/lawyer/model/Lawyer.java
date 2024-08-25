@@ -1,20 +1,16 @@
 package com.lawProject.SSL.domain.lawyer.model;
 
-import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
+import com.lawProject.SSL.domain.image.model.Image;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerCreateRequest;
 
 //변호사 정보
 
 @Getter
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 public class Lawyer {
     @Id
@@ -23,44 +19,51 @@ public class Lawyer {
     private Long id;
     private String name;
     private String businessRegistrationNumber; //사업자 등록 번호
+    private String intro; // 변호사 본인 소개
+    private String lawyerTag; // 변호사 분야
 
     @Embedded
     private Address address; //물리적 주소
     @Embedded
     private ContactInfo contactInfo; //연락 수단
-    @Embedded
-    private  LawyerTag lawyerTag;
+
+    @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Image image;
+
+    public Lawyer() {
+
+    }
 
     /* Using Method */
-    public void update(Address address, ContactInfo contactInfo, LawyerDto.LawyerForm form) {
+    public void update(Address address, ContactInfo contactInfo, LawyerCreateRequest request) {
         this.address = address;
         this.contactInfo = contactInfo;
-        this.name = form.name();
-        this.businessRegistrationNumber = form.businessRegistrationNumber();
+        this.lawyerTag = request.tag();
+        this.name = request.name();
+        this.businessRegistrationNumber = request.businessRegistrationNumber();
+    }
+
+    public void updateWithImage(Address address, ContactInfo contactInfo, LawyerCreateRequest request, Image image) {
+        this.address = address;
+        this.contactInfo = contactInfo;
+        this.lawyerTag = request.tag();
+        this.name = request.name();
+        this.businessRegistrationNumber = request.businessRegistrationNumber();
+        this.image = image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    @Builder
+    public Lawyer(String name, String businessRegistrationNumber, String intro, String lawyerTag, Address address, ContactInfo contactInfo) {
+        this.name = name;
+        this.businessRegistrationNumber = businessRegistrationNumber;
+        this.intro = intro;
+        this.lawyerTag = lawyerTag;
+        this.address = address;
+        this.contactInfo = contactInfo;
     }
 }
-//기본코드
-//서비스 추가 필요
-
-/*
-비교용 코드
-@Getter
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Lawyer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lawyer_id")
-    private Long id;
-
-    @NotNull
-    private String name;
-
-//    @NotNull
-//    private Field field;
-
-    private String details;
-
-}
-*/
 

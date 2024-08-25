@@ -1,66 +1,97 @@
 package com.lawProject.SSL.domain.lawyer.service;
 
+import com.lawProject.SSL.domain.image.model.Image;
+import com.lawProject.SSL.domain.image.service.ImageService;
+import com.lawProject.SSL.domain.lawyer.exception.LawyerException;
 import com.lawProject.SSL.domain.lawyer.model.Address;
 import com.lawProject.SSL.domain.lawyer.model.ContactInfo;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
-import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.repository.LawyerRepository;
+import com.lawProject.SSL.global.common.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
-//lawyer 서비스 담당
+import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerCreateRequest;
+import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerListResponse;
 
+@Slf4j
 @Service
-@Transactional(readOnly = false)
 @RequiredArgsConstructor
 public class LawyerService {
     private final LawyerRepository lawyerRepository;
+    private final ImageService imageService;
 
     /**
      * 변호사 생성 메서드
-     * 본래 Admin만 가능한 기능
+     * Admin만 가능한 기능
      */
     @Transactional
-    public void saveLawyer(LawyerDto.LawyerForm form) {
-
-        Address address = new Address(form.officeName(), form.officeAddress());
-        ContactInfo contactInfo = new ContactInfo(form.phoneNumber(), form.faxNumber(), form.emailAddress());
-
-        Lawyer lawyer = Lawyer.builder()
-                .name(form.name())
-                .address(address)
-                .contactInfo(contactInfo)
-                .build();
+    public void create(LawyerCreateRequest request, MultipartFile image) throws IOException {
+        Lawyer lawyer = createLawyer(request);
 
         lawyerRepository.save(lawyer);
+
+        if (image != null && !image.isEmpty()) {
+            String fileName = imageService.storeFile(image);
+            Image lawyerProfileImage = Image.ofLawyer(lawyer, fileName);
+            lawyer.setImage(lawyerProfileImage);
+        }
     }
 
     /**
      * 변호사 정보 업데이트 메서드
      */
     @Transactional
-    public void updateLawyer(Long lawyerId, LawyerDto.LawyerForm form) { //Param: 파리미터로 넘어온 준영속 상태의 엔티티
+    public void updateLawyer(Long lawyerId, LawyerCreateRequest request, MultipartFile image) { //Param: 파리미터로 넘어온 준영속 상태의 엔티티
         Lawyer findLawyer = findById(lawyerId);
 
-        Address address = new Address(form.officeName(), form.officeAddress());
-        ContactInfo contactInfo = new ContactInfo(form.phoneNumber(), form.faxNumber(), form.emailAddress());
+        Address address = Address.builder()
+                .officeName(request.officeName())
+                .officeAddress(request.officeAddress())
+                .build();
 
-        /* Dirty Checking 사용 */
-        findLawyer.update(address, contactInfo, form);
+        ContactInfo contactInfo = ContactInfo.builder()
+                .phoneNumber(request.phoneNumber())
+                .faxNumber(request.faxNumber())
+                .emailAddress(request.emailAddress())
+                .build();
+
+        findLawyer.update(address, contactInfo, request);
+
+        if (image != null && !image.isEmpty()) {
+            String fileName = imageService.storeFile(image);
+            Image lawyerImage = findLawyer.getImage();
+
+            if (lawyerImage == null) {
+                Image lawyerProfileImage = Image.ofLawyer(findLawyer, fileName);
+                findLawyer.setImage(lawyerProfileImage);
+            } else {
+                lawyerImage.updateImageName(fileName);
+            }
+        }
     }
 
     /**
      * 변호사 찾기 메서드
      */
-    public List<LawyerDto.LawyerListResponse> findLawyers() {
+    public List<LawyerListResponse> findLawyers() {
         List<Lawyer> lawyers = lawyerRepository.findAll();
 
-        List<LawyerDto.LawyerListResponse> lawyerListResponses = lawyers.stream().map(l -> LawyerDto.LawyerListResponse.of(l)).toList();
+        return lawyers.stream()
+                .map(LawyerListResponse::of)
+                .toList();
+    }
 
-        return lawyerListResponses;
+    /* 변호사 삭제 메서드 */
+    @Transactional
+    public void delete(Long lawyerId) {
+        lawyerRepository.deleteById(lawyerId);
     }
 
     /**
@@ -68,9 +99,29 @@ public class LawyerService {
      */
     public Lawyer findById(Long lawyerId) {
         return lawyerRepository.findById(lawyerId)
-                .orElseThrow(() -> new NullPointerException());
+                .orElseThrow(() -> new LawyerException(ErrorCode.LAWYER_NOT_FOUND));
+    }
+
+    private static Lawyer createLawyer(LawyerCreateRequest request) {
+        Address address = Address.builder()
+                .officeName(request.officeName())
+                .officeAddress(request.officeAddress())
+                .build();
+
+        ContactInfo contactInfo = ContactInfo.builder()
+                .phoneNumber(request.phoneNumber())
+                .faxNumber(request.faxNumber())
+                .emailAddress(request.emailAddress())
+                .build();
+
+        Lawyer lawyer = Lawyer.builder()
+                .name(request.name())
+                .intro(request.intro())
+                .lawyerTag(request.tag())
+                .businessRegistrationNumber(request.businessRegistrationNumber())
+                .address(address)
+                .contactInfo(contactInfo)
+                .build();
+        return lawyer;
     }
 }
-
-//기본코드
-//서비스 추가 필요
