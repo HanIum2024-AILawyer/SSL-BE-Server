@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.chatroom.api;
 
-import com.lawProject.SSL.domain.chatmessage.model.ChatMessage;
+import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.chatroom.application.ChatRoomService;
 import com.lawProject.SSL.domain.langchain.service.ChatService;
 import com.lawProject.SSL.domain.user.application.UserService;
@@ -18,8 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-import static com.lawProject.SSL.domain.chatmessage.dto.MessageResponse.ChatRoomMessageResponse;
-import static com.lawProject.SSL.domain.chatmessage.dto.MessageResponse.ChatRoomMessageWithPageInfoResponse;
+import static com.lawProject.SSL.domain.langchain.dto.ChatMessageDto.ChatRoomMessageResponse;
+import static com.lawProject.SSL.domain.langchain.dto.ChatMessageDto.ChatRoomMessageWithPageInfoResponse;
 
 @Slf4j
 @RestController

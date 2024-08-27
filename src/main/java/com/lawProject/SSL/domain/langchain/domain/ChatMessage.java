@@ -1,4 +1,4 @@
-package com.lawProject.SSL.domain.chatmessage.model;
+package com.lawProject.SSL.domain.langchain.domain;
 
 import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
 import com.lawProject.SSL.domain.user.model.User;

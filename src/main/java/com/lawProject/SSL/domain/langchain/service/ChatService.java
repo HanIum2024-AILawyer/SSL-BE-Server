@@ -1,10 +1,10 @@
 package com.lawProject.SSL.domain.langchain.service;
 
-import com.lawProject.SSL.domain.chatmessage.dao.MessageRepository;
-import com.lawProject.SSL.domain.chatmessage.model.ChatMessage;
+import com.lawProject.SSL.domain.langchain.dao.MessageRepository;
+import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
+import com.lawProject.SSL.domain.langchain.domain.SenderType;
 import com.lawProject.SSL.domain.chatroom.application.ChatRoomService;
 import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
-import com.lawProject.SSL.domain.chatmessage.dto.MessageDto;
 import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
@@ -25,36 +25,30 @@ public class ChatService {
     private final MessageRepository messageRepository;
 
     @Transactional
-    public void saveMessage(MessageDto dto, String roomId) {
-        if (dto.getSenderId() != null) { // User인 경우
-            User user = userService.findById(dto.getSenderId());
-            ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
-
-            ChatMessage chatMessage = ChatMessage.builder()
-                    .content(dto.getContent())
+    public void saveMessage(User user, String message, String roomId, SenderType senderType) {
+        ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
+        ChatMessage chatMessage;
+        if (senderType.equals(SenderType.USER)) {
+            chatMessage = ChatMessage.builder()
                     .sender(user)
                     .chatRoom(chatRoom)
-                    .senderType(dto.getSenderType())
+                    .content(message)
+                    .senderType(String.valueOf(SenderType.USER))
                     .build();
-
-            messageRepository.save(chatMessage);
-
-            chatRoom.addMessage(chatMessage);
-            log.info("메시지 저장 완료");
-        } else { // AI인 경우
-            ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
-
-            ChatMessage chatMessage = ChatMessage.builder()
-                    .content(dto.getContent())
+            log.info("사용자가 전송한 메시지 처리");
+        } else {
+            chatMessage = ChatMessage.builder()
+                    .sender(user)
                     .chatRoom(chatRoom)
-                    .senderType(dto.getSenderType())
+                    .content(message)
+                    .senderType(String.valueOf(SenderType.AI))
                     .build();
-
-            messageRepository.save(chatMessage);
-
-            chatRoom.addMessage(chatMessage);
-            log.info("메시지 저장 완료");
+            log.info("AI 답변 메시지 처리");
         }
+
+        messageRepository.save(chatMessage);
+
+        chatRoom.addMessage(chatMessage);
     }
 
     public Page<ChatMessage> getChatRoomMessages(String roomId, int page, int size) {
