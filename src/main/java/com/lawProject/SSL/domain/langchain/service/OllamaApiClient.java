@@ -21,7 +21,8 @@ public class OllamaApiClient {
     private final ChatService chatService;
     private final UserService userService;
 
-    /* 반환 타입을 Mono로 감싸는 이유
+    /** AI 질의응답 메서드
+    반환 타입을 Mono로 감싸는 이유
     비동기 작업을 외부에서 처리하려면 리액티브 타입으로 반환하는 것이 좋다.
     이렇게 하면 호출자가 메서드의 실행이 완료될 때까지 비동기적으로 기다릴 수 있다.
     *  */
