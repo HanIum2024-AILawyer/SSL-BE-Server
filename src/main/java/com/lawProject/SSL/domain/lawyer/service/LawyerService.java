@@ -5,6 +5,7 @@ import com.lawProject.SSL.domain.image.service.ImageService;
 import com.lawProject.SSL.domain.lawyer.exception.LawyerException;
 import com.lawProject.SSL.domain.lawyer.model.Address;
 import com.lawProject.SSL.domain.lawyer.model.ContactInfo;
+import com.lawProject.SSL.domain.lawyer.model.HashTag;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
 import com.lawProject.SSL.domain.lawyer.repository.LawyerRepository;
 import com.lawProject.SSL.global.common.code.ErrorCode;
@@ -62,7 +63,9 @@ public class LawyerService {
                 .emailAddress(request.emailAddress())
                 .build();
 
-        findLawyer.update(address, contactInfo, request);
+        HashTag hashtag = HashTag.builder().build();
+
+        findLawyer.update(address, contactInfo, hashtag, request);
 
         if (image != null && !image.isEmpty()) {
             String fileName = imageService.storeFile(image);
@@ -113,15 +116,26 @@ public class LawyerService {
                 .faxNumber(request.faxNumber())
                 .emailAddress(request.emailAddress())
                 .build();
+        HashTag hashTag = HashTag.builder().build();
 
         Lawyer lawyer = Lawyer.builder()
                 .name(request.name())
                 .intro(request.intro())
-                .lawyerTag(request.tag())
                 .businessRegistrationNumber(request.businessRegistrationNumber())
                 .address(address)
                 .contactInfo(contactInfo)
+                .hashTag(hashTag)
                 .build();
         return lawyer;
     }
+
+    /**
+     * 변호사 검색 메서드
+     * */
+    @Transactional
+    public List<Lawyer> search(String keyword) {
+        List<Lawyer> lawyerList = lawyerRepository.findByLawyerContains(keyword);
+        return lawyerList;
+    }
+
 }
