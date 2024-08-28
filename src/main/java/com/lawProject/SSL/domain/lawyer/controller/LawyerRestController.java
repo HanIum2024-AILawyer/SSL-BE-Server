@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.lawyer.controller;
 
+import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
 import com.lawProject.SSL.domain.lawyer.service.LawyerService;
 import com.lawProject.SSL.global.common.code.SuccessCode;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.*;
@@ -82,5 +84,13 @@ public class LawyerRestController {
         model.addAttribute("searchList", searchList);
         return ApiResponse.onSuccess(SuccessCode._OK, searchList);
     }
-    /**/
+//    @GetMapping("/lawyers/search")
+//    public ResponseEntity<ApiResponse<List<LawyerDto>>> searchLawyer(
+//            @RequestParam(value = "keyword", required = false) String keyword) {
+//        if (keyword == null || keyword.trim().isEmpty()) {
+//            return ApiResponse.onSuccess(SuccessCode._OK, Collections.emptyList());
+//        }
+//        List<LawyerDto> searchList = lawyerService.search(keyword);
+//        return ApiResponse.onSuccess(SuccessCode._OK, searchList);
+//    }
 }
