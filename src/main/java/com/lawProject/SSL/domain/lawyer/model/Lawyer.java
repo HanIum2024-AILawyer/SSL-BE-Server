@@ -20,12 +20,14 @@ public class Lawyer {
     private String name;
     private String businessRegistrationNumber; //사업자 등록 번호
     private String intro; // 변호사 본인 소개
-    private String lawyerTag; // 변호사 분야
+
 
     @Embedded
     private Address address; //물리적 주소
     @Embedded
     private ContactInfo contactInfo; //연락 수단
+    @Embedded
+    private HashTag hashTag;
 
     @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Image image;
@@ -35,18 +37,18 @@ public class Lawyer {
     }
 
     /* Using Method */
-    public void update(Address address, ContactInfo contactInfo, LawyerCreateRequest request) {
+    public void update(Address address, ContactInfo contactInfo, HashTag hashTag, LawyerCreateRequest request) {
         this.address = address;
         this.contactInfo = contactInfo;
-        this.lawyerTag = request.tag();
+        this.hashTag = hashTag;
         this.name = request.name();
         this.businessRegistrationNumber = request.businessRegistrationNumber();
     }
 
-    public void updateWithImage(Address address, ContactInfo contactInfo, LawyerCreateRequest request, Image image) {
+    public void updateWithImage(Address address, ContactInfo contactInfo, HashTag hashTag, LawyerCreateRequest request, Image image) {
         this.address = address;
         this.contactInfo = contactInfo;
-        this.lawyerTag = request.tag();
+        this.hashTag = hashTag;
         this.name = request.name();
         this.businessRegistrationNumber = request.businessRegistrationNumber();
         this.image = image;
@@ -57,11 +59,11 @@ public class Lawyer {
     }
 
     @Builder
-    public Lawyer(String name, String businessRegistrationNumber, String intro, String lawyerTag, Address address, ContactInfo contactInfo) {
+    public Lawyer(String name, String businessRegistrationNumber, String intro, String lawyerTag, HashTag hashTag, Address address, ContactInfo contactInfo) {
         this.name = name;
         this.businessRegistrationNumber = businessRegistrationNumber;
         this.intro = intro;
-        this.lawyerTag = lawyerTag;
+        this.hashTag = hashTag;
         this.address = address;
         this.contactInfo = contactInfo;
     }
