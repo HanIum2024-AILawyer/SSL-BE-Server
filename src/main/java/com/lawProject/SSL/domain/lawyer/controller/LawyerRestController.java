@@ -6,6 +6,7 @@ import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -73,4 +74,13 @@ public class LawyerRestController {
 
         return ApiResponse.onSuccess(SuccessCode._OK);
     }
+
+    /*변호사 검색 */
+    @GetMapping("/lawyers/search")
+    public ResponseEntity<ApiResponse<Object>> searchLawyer(String keyword, Model model) {
+        List<Lawyer> searchList = lawyerService.search(keyword);
+        model.addAttribute("searchList", searchList);
+        return ApiResponse.onSuccess(SuccessCode._OK, searchList);
+    }
+    /**/
 }
