@@ -2,6 +2,7 @@ package com.lawProject.SSL.domain.lawyer.service;
 
 import com.lawProject.SSL.domain.image.model.Image;
 import com.lawProject.SSL.domain.image.service.ImageService;
+import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.exception.LawyerException;
 import com.lawProject.SSL.domain.lawyer.model.Address;
 import com.lawProject.SSL.domain.lawyer.model.ContactInfo;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerCreateRequest;
 import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerListResponse;
@@ -137,5 +139,9 @@ public class LawyerService {
         List<Lawyer> lawyerList = lawyerRepository.findByLawyerContains(keyword);
         return lawyerList;
     }
+//    public List<LawyerListResponse> search(String keyword) {
+//        List<Lawyer> lawyerList = lawyerRepository.findByLawyerContains(keyword);
+//        return lawyerList.stream().map(LawyerListResponse::of).toList();
+//    }
 
 }
