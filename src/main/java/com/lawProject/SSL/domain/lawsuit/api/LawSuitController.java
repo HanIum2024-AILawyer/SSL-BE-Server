@@ -84,7 +84,7 @@ public class LawSuitController {
 
     /* 소송장 삭제 */
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Object>> deleteSuit(HttpServletRequest request, @RequestBody DeleteSuitRequest deleteSuitRequest) {
+    public ResponseEntity<ApiResponse<Object>> deleteSuit(@RequestBody DeleteSuitRequest deleteSuitRequest) {
         lawSuitService.deleteSuit(deleteSuitRequest);
         return ApiResponse.onSuccess(SuccessCode._OK);
     }
