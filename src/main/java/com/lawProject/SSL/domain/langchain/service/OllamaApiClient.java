@@ -3,6 +3,7 @@ package com.lawProject.SSL.domain.langchain.service;
 
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
 import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
+import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
@@ -59,33 +60,47 @@ public class OllamaApiClient {
 
     /* 소송장 첨삭 메서드 */
     @Transactional
-    public FileStorageResult fixDoc(MultipartFile file, HttpServletRequest request) {
+    public Mono<FileStorageResult> fixDoc(MultipartFile file, HttpServletRequest request) {
 
         if (!isWordFile(file)) {
             log.info("파일 형식이 올바르지 않습니다.");
             throw new FileException(ErrorCode.INVALID_FILE_TYPE);
         }
 
-
-        Resource fixedDocResource = webClient.post()
-                .uri("/ai/doc/fix_doc")
-                .bodyValue(file) // AI LLM으로 전달할 word 문서
+        return webClient.post()
+                .uri("/api/doc/fix_doc")
+                .bodyValue(file)
                 .retrieve()
                 .bodyToMono(Resource.class)
-                .block(); // 비동기적 호출은 동기적으로 처리
+                .flatMap(resource -> savedFile(request, resource));
+    }
 
-        FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
-        User user = userService.getUserInfo(request);
-
-        LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
-        lawSuit.setExpireTime(LocalDateTime.now().plusDays(20));
-        lawSuitRepository.save(lawSuit);
-        user.addLawsuit(lawSuit);
-
-        return fileStorageResult;
+    /* 소송장 생성 메서드 */
+    public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, HttpServletRequest request) {
+        return webClient.post()
+                .uri("/ai/doc/make_doc")
+                .bodyValue(makeDocForm)
+                .retrieve()
+                .bodyToMono(Resource.class)
+                .flatMap(resource -> savedFile(request, resource));
     }
 
     /* Using Method */
+    // 파일 저장
+    private Mono<FileStorageResult> savedFile(HttpServletRequest request, Resource fixedDocResource) {
+        return Mono.fromCallable(() -> {
+            FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
+            User user = userService.getUserInfo(request);
+
+            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
+            lawSuit.setExpireTime(LocalDateTime.now().plusDays(20));
+            lawSuitRepository.save(lawSuit);
+            user.addLawsuit(lawSuit);
+
+            return fileStorageResult;
+        });
+    }
+
     // word 형식이 맞는지 체크
     private boolean isWordFile(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();

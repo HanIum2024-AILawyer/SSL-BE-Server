@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.langchain.api;
 
+import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.langchain.service.OllamaApiClient;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.service.LawSuitService;
@@ -59,19 +60,28 @@ public class OllamaApiController {
      * 소송장 첨삭
      */
     @PostMapping("/doc/fix")
-    public ResponseEntity<ApiResponse<Object>> uploadFile(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
-        try {
-            FileStorageResult fixedFile = ollamaApiClient.fixDoc(file, request);
-            return ApiResponse.onSuccess(SuccessCode._OK, fixedFile);
-        } catch (Exception e) {
-            log.error("Failed to fix document: ", e);
-            return ApiResponse.onFailure(ErrorCode._INTERNAL_SERVER_ERROR);
-        }
+    public Mono<ResponseEntity<ApiResponse<FileStorageResult>>> fixDoc(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
+
+        return ollamaApiClient.fixDoc(file, request)
+                .map(fileStorageResult -> ApiResponse.onSuccess(SuccessCode._OK, fileStorageResult))
+                .onErrorResume(e -> {
+                    log.error("Failed to fix document: ", e);
+                    return Mono.just(ApiResponse.onFailure(ErrorCode._INTERNAL_SERVER_ERROR));
+                });
     }
 
     /**
      * 소송장 생성
      */
+    @PostMapping("/doc/make")
+    public Mono<ResponseEntity<ApiResponse<FileStorageResult>>> makeDoc(@RequestBody MakeDocForm makeDocForm, HttpServletRequest request) {
 
-
+        return ollamaApiClient.makeDoc(makeDocForm, request)
+                .map(fileStorageResult -> ApiResponse.onSuccess(SuccessCode._OK, fileStorageResult))
+                .onErrorResume(e -> {
+                    log.error("Failed to create document: ", e);
+                    return Mono.just(ApiResponse.onFailure(ErrorCode._INTERNAL_SERVER_ERROR));
+                });
     }
+
+}
