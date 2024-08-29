@@ -1,6 +1,5 @@
 package com.lawProject.SSL.domain.lawsuit.service;
 
-import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
@@ -17,13 +16,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
@@ -38,22 +34,6 @@ public class LawSuitService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final LawSuitRepository lawSuitRepository;
-
-    /* 소송장 업로드 메서드 */
-    @Transactional
-    public FileStorageResult uploadFile(MultipartFile file, HttpServletRequest request) throws IOException {
-        FileStorageResult fileStorageResult = fileService.storeFile(file);
-        User user = jwtUtil.getUserFromRequest(request);
-
-        if (file != null && !file.isEmpty()) {
-            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
-            lawSuit.setExpireTime(LocalDateTime.now().plusDays(7));
-            lawSuitRepository.save(lawSuit);
-            return fileStorageResult;
-        }
-
-        throw new FileException(ErrorCode.FILE_NOT_UPLOADED);
-    }
 
     /* 소송장 다운로드 매서드 */
     public Resource downloadFile(String filename) throws MalformedURLException {
@@ -76,13 +56,12 @@ public class LawSuitService {
     /* 소송장 목록 조회 메서드 */
     public List<LawSuitResponse> getLawSuitList(HttpServletRequest request) {
         User user = userService.getUserInfo(request);
-        Long userId = user.getId();
-        List<LawSuit> lawSuitList = lawSuitRepository.findAllByUserIdOrderByIdDesc(userId);
+//        List<LawSuit> lawSuitList = lawSuitRepository.findAllByUserIdOrderByIdDesc(userId);
+        List<LawSuit> lawSuitList = user.getLawSuitList();
 
-        List<LawSuitResponse> lawSuitResponseList = lawSuitList.stream().map(
+        return lawSuitList.stream().map(
                 LawSuitResponse::of
         ).toList();
-        return lawSuitResponseList;
     }
 
     /* 소송장 이름 변경 메서드 */

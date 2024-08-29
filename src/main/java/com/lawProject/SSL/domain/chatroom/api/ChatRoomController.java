@@ -1,7 +1,8 @@
 package com.lawProject.SSL.domain.chatroom.api;
 
-import com.lawProject.SSL.domain.chatmessage.model.ChatMessage;
 import com.lawProject.SSL.domain.chatroom.application.ChatRoomService;
+import com.lawProject.SSL.domain.chatroom.exception.ChatRoomException;
+import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.service.ChatService;
 import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.global.common.code.SuccessCode;
@@ -11,15 +12,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.List;
 
-import static com.lawProject.SSL.domain.chatmessage.dto.MessageResponse.ChatRoomMessageResponse;
-import static com.lawProject.SSL.domain.chatmessage.dto.MessageResponse.ChatRoomMessageWithPageInfoResponse;
+import static com.lawProject.SSL.domain.langchain.dto.ChatMessageDto.ChatRoomMessageResponse;
+import static com.lawProject.SSL.domain.langchain.dto.ChatMessageDto.ChatRoomMessageWithPageInfoResponse;
 
 @Slf4j
 @RestController
@@ -47,12 +50,12 @@ public class ChatRoomController {
     }
 
     // 채팅방 열기
-    @GetMapping("/{room-id}")
-    public ResponseEntity<ApiResponse<Object>> getChatRoomWithMessages(@PathVariable("room-id") String roomId,
-                                                          @RequestParam(defaultValue = "1") int page,
-                                                          @RequestParam(defaultValue = "10") int size,
-                                                          HttpServletRequest request
-            ) {
+    @GetMapping("/{roomId}")
+    public ResponseEntity<ApiResponse<Object>> getChatRoomWithMessages(@PathVariable("roomId") String roomId,
+                                                                       @RequestParam(defaultValue = "1") int page,
+                                                                       @RequestParam(defaultValue = "10") int size,
+                                                                       HttpServletRequest request
+    ) {
 
         // page, size 유효성 검정
         if (page < 1) page = 1;
@@ -60,7 +63,7 @@ public class ChatRoomController {
 
         Page<ChatMessage> messages =
                 chatService.getChatRoomMessages(roomId, page, size);
-        PageInfo pageInfo = new PageInfo(page, size, (int)messages.getTotalElements(), messages.getTotalPages());
+        PageInfo pageInfo = new PageInfo(page, size, (int) messages.getTotalElements(), messages.getTotalPages());
 
         List<ChatRoomMessageResponse> roomMessageResponses = messages.getContent().stream().map(
                 ChatRoomMessageResponse::of
@@ -73,5 +76,22 @@ public class ChatRoomController {
         return ApiResponse.onSuccess(SuccessCode._OK, chatRoomMessageWithPageInfoResponse);
     }
 
+    @DeleteMapping("/{roomId}")
+    public Mono<ResponseEntity<String>> deleteChatRoom(@PathVariable("roomId") String roomId,
+                                                                    HttpServletRequest request) {
+
+        return chatRoomService.delete(roomId, request)
+                .then(Mono.just(ResponseEntity.ok("AI Response Success")))
+                .onErrorResume(ChatRoomException.class, e -> {
+                    // ChatRoomException이 발생하면 적절한 에러 응답 반환
+                    return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Forbidden: " + e.getErrorCode().getMessage()));
+                })
+                .onErrorResume(Exception.class, e -> {
+                    // 기타 예외 처리
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Internal Server Error"));
+                });
+    }
 
 }

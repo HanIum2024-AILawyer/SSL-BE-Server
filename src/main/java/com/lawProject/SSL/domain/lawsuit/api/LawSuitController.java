@@ -1,6 +1,5 @@
 package com.lawProject.SSL.domain.lawsuit.api;
 
-import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.lawsuit.service.LawSuitService;
@@ -15,9 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -33,23 +30,8 @@ public class LawSuitController {
     private final LawSuitService lawSuitService;
     private final FileService fileService;
 
-    /* 소송장 업로드 */
-    @PostMapping("/upload")
-    public ResponseEntity<ApiResponse<Object>> uploadFile(@RequestPart(name = "file") MultipartFile file, HttpServletRequest request) {
-        try {
-            // 파일 형식 검사
-            if (!isWordFile(file)) {
-                return ApiResponse.onFailure(ErrorCode.INVALID_FILE_TYPE);
-            }
-            FileStorageResult fileStorageResult = lawSuitService.uploadFile(file, request);
-            return ApiResponse.onSuccess(SuccessCode._OK, fileStorageResult);
-        } catch (IOException e) {
-            log.info("File upload failed", e);
-            return ApiResponse.onFailure(ErrorCode._INTERNAL_SERVER_ERROR);
-        }
-    }
-
     /* 소송장 다운로드 */
+    // TODO originalFileName으로 변경시 정상적으로 디코딩 안되는 문제 해결, 파일 이름 앞에 userId 등 식별자 추가
     @GetMapping("/download/{storedFileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String storedFileName) {
         try {
@@ -102,21 +84,9 @@ public class LawSuitController {
 
     /* 소송장 삭제 */
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Object>> deleteSuit(HttpServletRequest request, @RequestBody DeleteSuitRequest deleteSuitRequest) {
+    public ResponseEntity<ApiResponse<Object>> deleteSuit(@RequestBody DeleteSuitRequest deleteSuitRequest) {
         lawSuitService.deleteSuit(deleteSuitRequest);
         return ApiResponse.onSuccess(SuccessCode._OK);
-    }
-
-    private boolean isWordFile(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename != null) {
-            String extension = getFileExtension(originalFilename);
-            return extension != null && (
-                    extension.equalsIgnoreCase("doc") ||
-                            extension.equalsIgnoreCase("docx")
-            );
-        }
-        return false;
     }
 
     private String getFileExtension(String fileName) {

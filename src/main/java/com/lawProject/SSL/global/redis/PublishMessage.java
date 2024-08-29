@@ -21,9 +21,6 @@ public class PublishMessage implements Serializable {
     @NotNull
     private String roomId;
 
-    @NotNull
-    private Long senderId;
-
     @NotBlank
     private String content;
 

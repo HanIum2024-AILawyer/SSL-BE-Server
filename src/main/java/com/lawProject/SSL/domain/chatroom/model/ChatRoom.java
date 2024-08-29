@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.chatroom.model;
 
-import com.lawProject.SSL.domain.chatmessage.model.ChatMessage;
+import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;

@@ -43,7 +43,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
     private List<LawSuit> lawSuitList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
     private List<InQuery> inQueryList = new ArrayList<>();
 
     @Builder
@@ -56,5 +56,9 @@ public class User extends BaseEntity {
 
     public void addInQuery(InQuery inQuery) {
         this.inQueryList.add(inQuery);
+    }
+
+    public void addLawsuit(LawSuit lawSuit) {
+        this.lawSuitList.add(lawSuit);
     }
 }

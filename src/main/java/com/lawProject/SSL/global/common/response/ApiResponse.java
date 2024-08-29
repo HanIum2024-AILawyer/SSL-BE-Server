@@ -38,4 +38,9 @@ public class ApiResponse<T> {
         ApiResponse<T> response = new ApiResponse<>(false, reasonHttpStatus.getHttpStatus(), reasonHttpStatus.getCode(), reasonHttpStatus.getMessage(), null);
         return ResponseEntity.status(reasonHttpStatus.getHttpStatus()).body(response);
     }
+    public static <T> ResponseEntity<ApiResponse<T>> onFailure(BaseCode code, T payload) {
+        ReasonDto reasonHttpStatus = code.getReasonHttpStatus();
+        ApiResponse<T> response = new ApiResponse<>(false, reasonHttpStatus.getHttpStatus(), reasonHttpStatus.getCode(), reasonHttpStatus.getMessage(), payload);
+        return ResponseEntity.status(reasonHttpStatus.getHttpStatus()).body(response);
+    }
 }
