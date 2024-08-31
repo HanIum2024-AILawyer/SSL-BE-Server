@@ -18,7 +18,7 @@ public class LawyerDto {
     public record LawyerCreateRequest(
             String name,
             String intro,
-            String tag,
+            String tagName,
             String businessRegistrationNumber,
             String officeName,
             String officeAddress,
@@ -36,14 +36,12 @@ public class LawyerDto {
     public record LawyerListResponse(
             Long id,
             String name,
-            String tagName,
             String imageName
     ) {
         public static LawyerListResponse of(Lawyer lawyer) {
             return LawyerListResponse.builder()
                     .id(lawyer.getId())
                     .name(lawyer.getName())
-                    .tagName(lawyer.getLawyerTag())
                     .imageName(lawyer.getImage().getImageName())
                     .build();
         }
@@ -71,7 +69,7 @@ public class LawyerDto {
                     .phoneNumber(lawyer.getContactInfo().getPhoneNumber())
                     .faxNumber(lawyer.getContactInfo().getFaxNumber())
                     .emailAddress(lawyer.getContactInfo().getEmailAddress())
-                    .tagName(lawyer.getLawyerTag())
+                    .tagName(lawyer.getHashTag().getTagName())
                     .build();
         }
     }
