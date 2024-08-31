@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.lawyer.repository;
 
+import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.model.Lawyer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -19,7 +20,7 @@ public interface LawyerRepository extends JpaRepository<Lawyer, Long> {
      * 일정한 규칙에 의해서 작성하면 됨*/
     Lawyer findByName(String name); // 이름으로 변호사 조회 기능 개발 끝!
     /* like 검색을 쓰기위해서 사용*/
-    List<Lawyer> findByLawyerContains(String keyword);
+    List<Lawyer> findByNameContains(String keyword);
 }
 
 //기본코드
