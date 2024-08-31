@@ -36,12 +36,14 @@ public class LawyerDto {
     public record LawyerListResponse(
             Long id,
             String name,
+            String tagName,
             String imageName
     ) {
         public static LawyerListResponse of(Lawyer lawyer) {
             return LawyerListResponse.builder()
                     .id(lawyer.getId())
                     .name(lawyer.getName())
+                    .tagName(lawyer.getHashTag().getTagName())
                     .imageName(lawyer.getImage().getImageName())
                     .build();
         }

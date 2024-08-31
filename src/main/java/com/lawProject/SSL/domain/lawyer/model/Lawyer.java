@@ -21,7 +21,6 @@ public class Lawyer {
     private String businessRegistrationNumber; //사업자 등록 번호
     private String intro; // 변호사 본인 소개
 
-
     @Embedded
     private Address address; //물리적 주소
     @Embedded
