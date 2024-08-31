@@ -65,7 +65,7 @@ public class LawyerService {
                 .emailAddress(request.emailAddress())
                 .build();
 
-        HashTag hashtag = HashTag.builder().build();
+        HashTag hashtag = HashTag.builder().tagName(request.tagName()).build();
 
         findLawyer.update(address, contactInfo, hashtag, request);
 
@@ -135,13 +135,13 @@ public class LawyerService {
      * 변호사 검색 메서드
      * */
     @Transactional
-    public List<Lawyer> search(String keyword) {
-        List<Lawyer> lawyerList = lawyerRepository.findByLawyerContains(keyword);
-        return lawyerList;
-    }
-//    public List<LawyerListResponse> search(String keyword) {
+//    public List<Lawyer> search(String keyword) {
 //        List<Lawyer> lawyerList = lawyerRepository.findByLawyerContains(keyword);
-//        return lawyerList.stream().map(LawyerListResponse::of).toList();
+//        return lawyerList;
 //    }
+    public List<LawyerListResponse> search(String keyword) {
+        List<Lawyer> lawyerList = lawyerRepository.findByNameContains(keyword);
+        return lawyerList.stream().map(LawyerListResponse::of).toList();
+    }
 
 }
