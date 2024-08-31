@@ -59,7 +59,7 @@ public class Lawyer {
     }
 
     @Builder
-    public Lawyer(String name, String businessRegistrationNumber, String intro, String lawyerTag, HashTag hashTag, Address address, ContactInfo contactInfo) {
+    public Lawyer(String name, String businessRegistrationNumber, String intro, HashTag hashTag, Address address, ContactInfo contactInfo) {
         this.name = name;
         this.businessRegistrationNumber = businessRegistrationNumber;
         this.intro = intro;
