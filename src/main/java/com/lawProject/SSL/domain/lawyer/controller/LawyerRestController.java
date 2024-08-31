@@ -79,18 +79,12 @@ public class LawyerRestController {
 
     /*변호사 검색 */
     @GetMapping("/lawyers/search")
-    public ResponseEntity<ApiResponse<Object>> searchLawyer(String keyword, Model model) {
-        List<Lawyer> searchList = lawyerService.search(keyword);
-        model.addAttribute("searchList", searchList);
+    public ResponseEntity<ApiResponse<List<LawyerListResponse>>> searchLawyer(
+            @RequestParam(value = "keyword", required = true, defaultValue = "") String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ApiResponse.onSuccess(SuccessCode._OK, Collections.emptyList());
+        }
+        List<LawyerListResponse> searchList = lawyerService.search(keyword);
         return ApiResponse.onSuccess(SuccessCode._OK, searchList);
     }
-//    @GetMapping("/lawyers/search")
-//    public ResponseEntity<ApiResponse<List<LawyerDto>>> searchLawyer(
-//            @RequestParam(value = "keyword", required = false) String keyword) {
-//        if (keyword == null || keyword.trim().isEmpty()) {
-//            return ApiResponse.onSuccess(SuccessCode._OK, Collections.emptyList());
-//        }
-//        List<LawyerDto> searchList = lawyerService.search(keyword);
-//        return ApiResponse.onSuccess(SuccessCode._OK, searchList);
-//    }
 }
