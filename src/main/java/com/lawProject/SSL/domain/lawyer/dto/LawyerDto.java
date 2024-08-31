@@ -18,7 +18,7 @@ public class LawyerDto {
     public record LawyerCreateRequest(
             String name,
             String intro,
-            String hashTag,
+            String tagName,
             String businessRegistrationNumber,
             String officeName,
             String officeAddress,
