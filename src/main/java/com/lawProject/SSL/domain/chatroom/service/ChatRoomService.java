@@ -5,7 +5,7 @@ import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
 import com.lawProject.SSL.domain.chatroom.repository.ChatRoomRepository;
 import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
-import com.lawProject.SSL.domain.langchain.service.ChatService;
+import com.lawProject.SSL.domain.langchain.service.ChatMessageService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.response.PageInfo;
@@ -27,7 +27,7 @@ import static com.lawProject.SSL.domain.chatroom.dto.ChatRoomDto.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatRoomService {
-    private final ChatService chatService;
+    private final ChatMessageService chatMessageService;
     private final ChatRoomRepository chatRoomRepository;
     private final WebClient webClient;
 
@@ -79,7 +79,7 @@ public class ChatRoomService {
     /* 채팅방 열기 메서드 - 채팅방 메시지도 조회 */
     public ChatRoomMessageWithPageInfoResponse openChatRoom(String roomId, int page, int size, User user) {
         Page<ChatMessage> messages =
-                chatService.getChatRoomMessages(roomId, page, size);
+                chatMessageService.getChatRoomMessages(roomId, page, size);
         PageInfo pageInfo = new PageInfo(page, size, (int) messages.getTotalElements(), messages.getTotalPages());
 
         //TODO 채팅방 리스트도 반환하도록 수정

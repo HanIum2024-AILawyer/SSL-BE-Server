@@ -1,6 +1,6 @@
 package com.lawProject.SSL.domain.langchain.service;
 
-import com.lawProject.SSL.domain.langchain.dao.MessageRepository;
+import com.lawProject.SSL.domain.langchain.repository.ChatMessageRepository;
 import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
 import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
@@ -19,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ChatService {
+public class ChatMessageService {
     private final UserService userService;
     private final ChatRoomService chatRoomService;
-    private final MessageRepository messageRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
     public void saveMessage(User user, String message, String roomId, SenderType senderType) {
@@ -33,7 +33,7 @@ public class ChatService {
                     .sender(user)
                     .chatRoom(chatRoom)
                     .content(message)
-                    .senderType(String.valueOf(SenderType.USER))
+                    .senderType(String.valueOf(senderType))
                     .build();
             log.info("사용자가 전송한 메시지 처리");
         } else {
@@ -41,12 +41,12 @@ public class ChatService {
                     .sender(user)
                     .chatRoom(chatRoom)
                     .content(message)
-                    .senderType(String.valueOf(SenderType.AI))
+                    .senderType(String.valueOf(senderType))
                     .build();
             log.info("AI 답변 메시지 처리");
         }
 
-        messageRepository.save(chatMessage);
+        chatMessageRepository.save(chatMessage);
 
         chatRoom.addMessage(chatMessage);
     }
@@ -55,8 +55,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<ChatMessage> messages = messageRepository.findByChatRoom(pageable, chatRoom);
 
-        return messages;
+        return chatMessageRepository.findByChatRoom(pageable, chatRoom);
     }
 }
