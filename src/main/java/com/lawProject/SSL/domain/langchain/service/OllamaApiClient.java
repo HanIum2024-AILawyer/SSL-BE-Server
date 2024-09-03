@@ -9,7 +9,7 @@ import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
-import com.lawProject.SSL.domain.user.application.UserService;
+import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +26,11 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OllamaApiClient {
     private final WebClient webClient;
-    private final ChatService chatService;
+    private final ChatMessageService chatMessageService;
     private final UserService userService;
     private final FileService fileService;
     private final LawSuitRepository lawSuitRepository;
@@ -43,7 +44,7 @@ public class OllamaApiClient {
     public Mono<ChatMessageDto.ChatResponse> sendQuestion(String roomId, HttpServletRequest request, String question) {
         User user = userService.getUserInfo(request);
         // 사용자 질문 저장
-        chatService.saveMessage(user, question, roomId, SenderType.USER);
+        chatMessageService.saveMessage(user, question, roomId, SenderType.USER);
 
         ChatMessageDto.ChatRequest chatRequest = ChatMessageDto.ChatRequest.builder()
                 .roomId(roomId)

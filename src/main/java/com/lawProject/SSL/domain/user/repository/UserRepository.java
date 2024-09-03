@@ -1,4 +1,4 @@
-package com.lawProject.SSL.domain.user.dao;
+package com.lawProject.SSL.domain.user.repository;
 
 import com.lawProject.SSL.domain.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
