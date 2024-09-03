@@ -4,12 +4,9 @@ import com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
-import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
-import com.lawProject.SSL.global.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -25,14 +22,12 @@ import java.util.List;
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.UpdateFileNameLawSuitRequest;
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class LawSuitService {
     private final FileService fileService;
-    private final UserService userService;
-    private final JwtUtil jwtUtil;
     private final LawSuitRepository lawSuitRepository;
 
     /* 소송장 다운로드 매서드 */
@@ -47,16 +42,8 @@ public class LawSuitService {
         }
     }
 
-    public String getOriginalFileName(String storedFileName) {
-        LawSuit lawSuit = lawSuitRepository.findByStoredFileName(storedFileName)
-                .orElseThrow(() -> new FileException(ErrorCode.FILE_NOT_FOUND));
-        return lawSuit.getOriginalFileName();
-    }
-
     /* 소송장 목록 조회 메서드 */
-    public List<LawSuitResponse> getLawSuitList(HttpServletRequest request) {
-        User user = userService.getUserInfo(request);
-//        List<LawSuit> lawSuitList = lawSuitRepository.findAllByUserIdOrderByIdDesc(userId);
+    public List<LawSuitResponse> getLawSuitList(User user) {
         List<LawSuit> lawSuitList = user.getLawSuitList();
 
         return lawSuitList.stream().map(
@@ -66,23 +53,43 @@ public class LawSuitService {
 
     /* 소송장 이름 변경 메서드 */
     @Transactional
-    public void changeOriginalFileName(HttpServletRequest request, UpdateFileNameLawSuitRequest changeLawSuitRequest) {
+    public void changeOriginalFileName(User user, UpdateFileNameLawSuitRequest changeLawSuitRequest) {
         LawSuit lawSuit = findLawSuitById(changeLawSuitRequest.lawSuitId());
         String originalFileName = lawSuit.getOriginalFileName();
-        User user = userService.getUserInfo(request);
-        if (!lawSuit.getUser().getId().equals(user.getId())) {
+
+        if (!lawSuit.getUser().equals(user)) {
             throw new UserException(ErrorCode.USER_MISMATCH);
         }
         String newOriginalFileName = generateNewOriginalFileName(originalFileName, changeLawSuitRequest.updateOriginalFileName());
         lawSuit.setOriginalFileName(newOriginalFileName);
     }
 
+    /* 소송장 삭제 메서드 */
+    @Transactional
+    public void deleteSuit(lawSuitDto.DeleteSuitRequest deleteSuitRequest) {
+        List<Long> lawSuitIdList = deleteSuitRequest.lawSuitIdList();
+        if (lawSuitIdList != null && !lawSuitIdList.isEmpty()) {
+            lawSuitRepository.deleteAllById(lawSuitIdList);
+        }
+
+        List<String> storedFileNames = lawSuitIdList.stream()
+                .map(id ->
+                {
+                    return findLawSuitById(id).getStoredFileName();
+                })
+                .toList();
+
+        fileService.deleteFiles(storedFileNames);
+        log.info("파일 저장소에서 파일 삭제 완료");
+    }
+
+    /* Using Method */
     private String generateNewOriginalFileName(String originalFileName, String newFileNameWithoutExt) {
         String extension = extractFileExtension(originalFileName);
         return newFileNameWithoutExt + "." + extension;
     }
 
-    private String extractFileExtension(String filename) {
+    public String extractFileExtension(String filename) {
         int pos = filename.lastIndexOf(".");
         return filename.substring(pos + 1);
     }
@@ -93,12 +100,9 @@ public class LawSuitService {
         );
     }
 
-    /* 소송장 삭제 메서드 */
-    @Transactional
-    public void deleteSuit(lawSuitDto.DeleteSuitRequest deleteSuitRequest) {
-        List<Long> lawSuitIdList = deleteSuitRequest.lawSuitIdList();
-        if (lawSuitIdList != null && !lawSuitIdList.isEmpty()) {
-            lawSuitRepository.deleteAllById(lawSuitIdList);
-        }
+    public String getOriginalFileName(String storedFileName) {
+        LawSuit lawSuit = lawSuitRepository.findByStoredFileName(storedFileName)
+                .orElseThrow(() -> new FileException(ErrorCode.FILE_NOT_FOUND));
+        return lawSuit.getOriginalFileName();
     }
 }

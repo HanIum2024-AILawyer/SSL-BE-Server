@@ -103,13 +103,26 @@ public class FileService {
         }
     }
 
+    /* 모든 파일 삭제 메서드 */
     public void deleteAllFiles() {
         try {
             Files.walk(fileStorageLocation)
                     .map(Path::toFile)
                     .forEach(File::delete);
         } catch (IOException ex) {
-            throw new FileException(ErrorCode.FILE_STORGE_ERROR);
+            throw new FileException(ErrorCode.IMAGE_STORAGE_ERROR);
+        }
+    }
+
+    /* 특정 파일 삭제 메서드 */
+    public void deleteFiles(List<String> fileNames) {
+        for (String fileName : fileNames) {
+            try {
+                Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+                Files.delete(filePath);
+            } catch (IOException ex) {
+                throw new FileException(ErrorCode.IMAGE_STORAGE_ERROR);
+            }
         }
     }
 
