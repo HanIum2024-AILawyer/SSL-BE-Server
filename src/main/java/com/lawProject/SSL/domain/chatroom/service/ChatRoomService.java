@@ -6,7 +6,6 @@ import com.lawProject.SSL.domain.chatroom.repository.ChatRoomRepository;
 import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
 import com.lawProject.SSL.domain.langchain.service.ChatService;
-import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.response.PageInfo;
@@ -25,9 +24,9 @@ import static com.lawProject.SSL.domain.chatroom.dto.ChatRoomDto.*;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatRoomService {
-    private final UserService userService;
     private final ChatService chatService;
     private final ChatRoomRepository chatRoomRepository;
     private final WebClient webClient;

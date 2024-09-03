@@ -3,12 +3,10 @@ package com.lawProject.SSL.domain.inquery.service;
 import com.lawProject.SSL.domain.inquery.dao.InQueryRepository;
 import com.lawProject.SSL.domain.inquery.exception.InQueryException;
 import com.lawProject.SSL.domain.inquery.model.InQuery;
-import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.domain.user.model.UserRole;
 import com.lawProject.SSL.global.common.code.ErrorCode;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +27,14 @@ import static com.lawProject.SSL.domain.inquery.dto.InQueryDto.*;
 @RequiredArgsConstructor
 public class InQueryService {
     private final InQueryRepository inQueryRepository;
-    private final UserService userService;
 
     /* Q&A 작성 메서드 */
     @Transactional
-    public void write(HttpServletRequest request, InQueryWriteRequest inQueryWriteRequest) {
-        User user = userService.getUserInfo(request);
+    public void write(User user, InQueryWriteRequest inQueryWriteRequest) {
         InQuery inQuery = inQueryWriteRequest.toEntity(user);
         inQueryRepository.save(inQuery);
         user.addInQuery(inQuery);
+        log.info("User ID {}가 새로운 Q&A를 작성했습니다.", user.getId());
     }
 
     /* Q&A 상세 페이지 메서드 */
@@ -60,30 +57,26 @@ public class InQueryService {
 
 
     /* 나의 Q&A 목록 조회 메서드 */
-    public List<InQueryListResponse> getMyInQuery(HttpServletRequest request, boolean isAnswered) {
-        User user = userService.getUserInfo(request);
-        List<InQueryListResponse> myInQueryListResponse = user.getInQueryList().stream()
+    public List<InQueryListResponse> getMyInQuery(User user, boolean isAnswered) {
+        // 매개변수에 따라 필터링
+        return user.getInQueryList().stream()
                 .filter(i -> i.getIsAnswer() == isAnswered)  // 매개변수에 따라 필터링
                 .map(InQueryListResponse::of)
                 .toList();
-
-        return myInQueryListResponse;
     }
-
-
 
     @Transactional
     /* 문의글 답변 달기 메서드
     * 역할이 Admin 사용자만 가능 */
-    public void answer(HttpServletRequest request, @Valid InQueryAnswerRequest inQueryAnswerRequest) {
+    public void answer(User admin, @Valid InQueryAnswerRequest inQueryAnswerRequest) {
         // 역할이 Admin이 맞는지 2차 검증
-        User admin = userService.getUserInfo(request);
         if (!admin.getRole().equals(UserRole.ADMIN)) {
             throw new UserException(ErrorCode._FORBIDDEN);
         }
 
         InQuery inQuery = findInQueryById(inQueryAnswerRequest.id());
         inQuery.setAnswer(inQueryAnswerRequest.answer());
+        log.info("InQuery ID {}에 답변을 작성했습니다.", inQuery.getId());
     }
 
     /* Using Method */

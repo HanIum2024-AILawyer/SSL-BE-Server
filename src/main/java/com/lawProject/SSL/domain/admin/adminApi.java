@@ -2,9 +2,10 @@ package com.lawProject.SSL.domain.admin;
 
 import com.lawProject.SSL.domain.inquery.dto.InQueryDto;
 import com.lawProject.SSL.domain.inquery.service.InQueryService;
+import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.annotation.CurrentUser;
 import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,9 @@ public class adminApi {
     @PostMapping("/inquery")
     public ResponseEntity<ApiResponse<Object>> answer(
             @RequestBody @Valid InQueryDto.InQueryAnswerRequest inQueryAnswerRequest,
-            HttpServletRequest request
-    ) {
-        inQueryService.answer(request, inQueryAnswerRequest);
+            @CurrentUser User user
+            ) {
+        inQueryService.answer(user, inQueryAnswerRequest);
 
         return ApiResponse.onSuccess(SuccessCode._OK);
     }
