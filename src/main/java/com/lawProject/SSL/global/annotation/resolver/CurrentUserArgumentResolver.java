@@ -1,6 +1,6 @@
 package com.lawProject.SSL.global.annotation.resolver;
 
-import com.lawProject.SSL.domain.user.application.UserService;
+import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.annotation.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;

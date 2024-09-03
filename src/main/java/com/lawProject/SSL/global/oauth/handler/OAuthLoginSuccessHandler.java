@@ -3,7 +3,7 @@ package com.lawProject.SSL.global.oauth.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.token.model.RefreshToken;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;

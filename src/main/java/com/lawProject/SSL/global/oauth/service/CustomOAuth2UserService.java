@@ -1,7 +1,7 @@
 package com.lawProject.SSL.global.oauth.service;
 
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.oauth.info.GoogleUserInfo;
 import com.lawProject.SSL.global.oauth.info.KaKaoUserInfo;

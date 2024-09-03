@@ -3,7 +3,7 @@ package com.lawProject.SSL.global.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
 import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLogoutHandler;

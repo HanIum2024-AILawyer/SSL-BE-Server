@@ -5,7 +5,7 @@ import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
 import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
 import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
-import com.lawProject.SSL.domain.user.application.UserService;
+import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

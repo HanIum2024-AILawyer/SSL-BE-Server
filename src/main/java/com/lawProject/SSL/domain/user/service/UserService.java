@@ -1,6 +1,6 @@
-package com.lawProject.SSL.domain.user.application;
+package com.lawProject.SSL.domain.user.service;
 
-import com.lawProject.SSL.domain.user.dao.UserRepository;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
