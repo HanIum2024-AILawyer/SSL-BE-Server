@@ -54,9 +54,9 @@ public class ChatRoomController {
 
     @DeleteMapping("/{roomId}")
     public Mono<ResponseEntity<String>> deleteChatRoom(@PathVariable("roomId") String roomId,
-                                                                    HttpServletRequest request) {
+                                                       @CurrentUser User user) {
 
-        return chatRoomService.delete(roomId, request)
+        return chatRoomService.delete(roomId, user)
                 .then(Mono.just(ResponseEntity.ok("AI Response Success")))
                 .onErrorResume(ChatRoomException.class, e -> {
                     // ChatRoomException이 발생하면 적절한 에러 응답 반환

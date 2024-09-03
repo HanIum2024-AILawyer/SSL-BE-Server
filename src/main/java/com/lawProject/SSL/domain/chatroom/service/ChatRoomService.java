@@ -10,7 +10,6 @@ import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.response.PageInfo;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -50,9 +49,8 @@ public class ChatRoomService {
 
     /* 채팅방 삭제 메서드 */
     @Transactional
-    public Mono<Void> delete(String roomId, HttpServletRequest request) {
+    public Mono<Void> delete(String roomId, User user) {
         ChatRoom chatRoom = findByRoomId(roomId);
-        User user = userService.getUserInfo(request);
 
         if (!chatRoom.getUser().equals(user)) {
             log.error("채팅방 소유자와 현재 로그인 사용자가 일치하지 않습니다.");
