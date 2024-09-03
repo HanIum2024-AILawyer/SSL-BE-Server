@@ -21,7 +21,6 @@ import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class LawyerRestController {
-
     private final LawyerService lawyerService;
 
     /* 변호사 등록, Admin */

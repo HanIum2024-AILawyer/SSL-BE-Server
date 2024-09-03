@@ -23,6 +23,7 @@ import static com.lawProject.SSL.domain.lawyer.dto.LawyerDto.LawyerListResponse;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class LawyerService {
     private final LawyerRepository lawyerRepository;
@@ -45,9 +46,7 @@ public class LawyerService {
         }
     }
 
-    /**
-     * 변호사 정보 업데이트 메서드
-     */
+    /* 변호사 정보 업데이트 메서드 */
     @Transactional
     public void updateLawyer(Long lawyerId, LawyerCreateRequest request, MultipartFile image) { //Param: 파리미터로 넘어온 준영속 상태의 엔티티
         Lawyer findLawyer = findById(lawyerId);
@@ -80,9 +79,7 @@ public class LawyerService {
         }
     }
 
-    /**
-     * 변호사 찾기 메서드
-     */
+    /* 변호사 목록 조회 메서드 */
     public List<LawyerListResponse> findLawyers() {
         List<Lawyer> lawyers = lawyerRepository.findAll();
 
@@ -94,8 +91,18 @@ public class LawyerService {
     /* 변호사 삭제 메서드 */
     @Transactional
     public void delete(Long lawyerId) {
+        String imageName = findById(lawyerId).getImage().getImageName();
         lawyerRepository.deleteById(lawyerId);
+        imageService.deleteFile(imageName);
     }
+
+
+    /* 변호사 검색 메서드 */
+    public List<LawyerListResponse> search(String keyword) {
+        List<Lawyer> lawyerList = lawyerRepository.findByNameContains(keyword);
+        return lawyerList.stream().map(LawyerListResponse::of).toList();
+    }
+
 
     /**
      * Using Method
@@ -118,7 +125,7 @@ public class LawyerService {
                 .build();
         HashTag hashTag = HashTag.builder().build();
 
-        Lawyer lawyer = Lawyer.builder()
+        return Lawyer.builder()
                 .name(request.name())
                 .intro(request.intro())
                 .businessRegistrationNumber(request.businessRegistrationNumber())
@@ -126,15 +133,5 @@ public class LawyerService {
                 .contactInfo(contactInfo)
                 .hashTag(hashTag)
                 .build();
-        return lawyer;
     }
-
-    /**
-     * 변호사 검색 메서드
-     * */
-    public List<LawyerListResponse> search(String keyword) {
-        List<Lawyer> lawyerList = lawyerRepository.findByNameContains(keyword);
-        return lawyerList.stream().map(LawyerListResponse::of).toList();
-    }
-
 }

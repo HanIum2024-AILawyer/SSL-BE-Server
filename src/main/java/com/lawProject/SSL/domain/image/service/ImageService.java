@@ -81,10 +81,20 @@ public class ImageService {
     }
 
     /* 특정 파일 삭제 메서드 */
-    public void deleteFiles(List<String> fileNames) {
-        for (String fileName : fileNames) {
+    public void deleteFile(String imageName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(imageName).normalize();
+            Files.delete(filePath);
+        } catch (IOException ex) {
+            throw new ImageException(ErrorCode.IMAGE_STORAGE_ERROR);
+        }
+    }
+
+    /* 특정 파일들 삭제 메서드 */
+    public void deleteFiles(List<String> imageNames) {
+        for (String imageName : imageNames) {
             try {
-                Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+                Path filePath = this.fileStorageLocation.resolve(imageName).normalize();
                 Files.delete(filePath);
             } catch (IOException ex) {
                 throw new ImageException(ErrorCode.IMAGE_STORAGE_ERROR);
