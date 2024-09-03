@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.user.model;
 
+import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.inquery.model.InQuery;
 import com.lawProject.SSL.global.common.dao.BaseEntity;
@@ -46,6 +47,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
     private List<InQuery> inQueryList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
+    private List<ChatRoom> chatRoomList = new ArrayList<>();
+
     @Builder
     public User(String userId, String name, String provider, String providerId) {
         this.userId = userId;
@@ -60,5 +64,9 @@ public class User extends BaseEntity {
 
     public void addLawsuit(LawSuit lawSuit) {
         this.lawSuitList.add(lawSuit);
+    }
+
+    public void addChatRoom(ChatRoom chatRoom) {
+        this.chatRoomList.add(chatRoom);
     }
 }

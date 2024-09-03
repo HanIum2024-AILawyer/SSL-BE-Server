@@ -3,7 +3,7 @@ package com.lawProject.SSL.domain.langchain.service;
 import com.lawProject.SSL.domain.langchain.dao.MessageRepository;
 import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
-import com.lawProject.SSL.domain.chatroom.application.ChatRoomService;
+import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
 import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
 import com.lawProject.SSL.domain.user.application.UserService;
 import com.lawProject.SSL.domain.user.model.User;
@@ -54,7 +54,7 @@ public class ChatService {
     public Page<ChatMessage> getChatRoomMessages(String roomId, int page, int size) {
         ChatRoom chatRoom = chatRoomService.findByRoomId(roomId);
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<ChatMessage> messages = messageRepository.findByChatRoom(pageable, chatRoom);
 
         return messages;
