@@ -15,7 +15,7 @@ public class MakeDocForm {
     private int defendantCount; // 피고 숫자 또는 피고소인 숫자
     private String caseDescription; // 사건에 대한 서술
     private BigDecimal claimAmount; // 피해 금액 or 청구할 금액 (민사)
-    private BigDecimal damageScale; // 피해 규모 (형사)
+    private String damageScale; // 피해 규모 (형사)
 
     /*
     BigDecimal 타입 사용 이유
