@@ -7,6 +7,7 @@ import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
+import com.lawProject.SSL.domain.lawsuit.model.LawsuitType;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.user.service.UserService;
@@ -78,23 +79,23 @@ public class OllamaApiClient {
 
     /* 소송장 생성 메서드 */
     public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, HttpServletRequest request) {
+        LawsuitType lawsuitType = makeDocForm.getLawsuitType();
         return webClient.post()
                 .uri("/ai/doc/make_doc")
                 .bodyValue(makeDocForm)
                 .retrieve()
                 .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFile(request, resource));
+                .flatMap(resource -> savedFile(request, resource, lawsuitType));
     }
 
     /* Using Method */
     // 파일 저장
-    private Mono<FileStorageResult> savedFile(HttpServletRequest request, Resource fixedDocResource) {
+    private Mono<FileStorageResult> savedFile(HttpServletRequest request, Resource fixedDocResource, LawsuitType lawsuitType) {
         return Mono.fromCallable(() -> {
             FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
             User user = userService.getUserInfo(request);
 
-            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
-            lawSuit.setExpireTime(LocalDateTime.now().plusDays(20));
+            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult, lawsuitType);
             lawSuitRepository.save(lawSuit);
             user.addLawsuit(lawSuit);
 
