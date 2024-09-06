@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.lawProject.SSL.domain.lawsuit.dto.lawSuitDto.LawSuitResponse;
@@ -81,6 +83,19 @@ public class LawSuitService {
 
         fileService.deleteFiles(storedFileNames);
         log.info("파일 저장소에서 파일 삭제 완료");
+    }
+
+    /* 만료 기한이 지난 소송장 자동 삭제 메서드*/
+    @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
+    public void deleteExpiredLawSuits() {
+        LocalDateTime now = LocalDateTime.now();
+        List<LawSuit> expiredLawSuits = lawSuitRepository.findByExpireTimeBefore(now);
+        lawSuitRepository.deleteAll(expiredLawSuits);
+        List<String> storeFileNames = expiredLawSuits.stream()
+                .map(s -> s.getStoredFileName())
+                .toList();
+        fileService.deleteFiles(storeFileNames);
+        log.info("만료 기한이 지난 파일 삭제");
     }
 
     /* Using Method */

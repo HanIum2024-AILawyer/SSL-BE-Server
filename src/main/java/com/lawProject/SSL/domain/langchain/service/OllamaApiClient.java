@@ -7,10 +7,11 @@ import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
 import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
+import com.lawProject.SSL.domain.lawsuit.model.LawsuitType;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
-import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -78,23 +77,36 @@ public class OllamaApiClient {
 
     /* 소송장 생성 메서드 */
     public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, HttpServletRequest request) {
+        LawsuitType lawsuitType = makeDocForm.getLawsuitType();
         return webClient.post()
                 .uri("/ai/doc/make_doc")
                 .bodyValue(makeDocForm)
                 .retrieve()
                 .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFile(request, resource));
+                .flatMap(resource -> savedFileWithType(request, resource, lawsuitType));
     }
 
     /* Using Method */
     // 파일 저장
+    private Mono<FileStorageResult> savedFileWithType(HttpServletRequest request, Resource fixedDocResource, LawsuitType lawsuitType) {
+        return Mono.fromCallable(() -> {
+            FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
+            User user = userService.getUserInfo(request);
+
+            LawSuit lawSuit = LawSuit.ofUserWithType(user, fileStorageResult, lawsuitType);
+            lawSuitRepository.save(lawSuit);
+            user.addLawsuit(lawSuit);
+
+            return fileStorageResult;
+        });
+    }
+
     private Mono<FileStorageResult> savedFile(HttpServletRequest request, Resource fixedDocResource) {
         return Mono.fromCallable(() -> {
             FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
             User user = userService.getUserInfo(request);
 
             LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
-            lawSuit.setExpireTime(LocalDateTime.now().plusDays(20));
             lawSuitRepository.save(lawSuit);
             user.addLawsuit(lawSuit);
 

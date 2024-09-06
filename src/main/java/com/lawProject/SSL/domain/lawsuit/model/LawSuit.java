@@ -27,15 +27,14 @@ public class LawSuit extends BaseEntity {
 
     private LocalDateTime expireTime;
 
+    @Enumerated(EnumType.STRING)
+    private LawsuitType lawsuitType;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     /* Using Method */
-    public void setExpireTime(LocalDateTime expireTime) {
-        this.expireTime = expireTime;
-    }
-
     public void setOriginalFileName(String newOriginalFileName) {
         this.originalFileName = newOriginalFileName;
     }
@@ -46,6 +45,17 @@ public class LawSuit extends BaseEntity {
                 .user(user)
                 .storedFileName(fileStorageResult.getStoredFileName())
                 .originalFileName(fileStorageResult.getOriginalFileName())
+                .expireTime(LocalDateTime.now().plusDays(30)) // 기본 만료 시간 설정
+                .build();
+    }
+
+    public static LawSuit ofUserWithType(User user, FileStorageResult fileStorageResult, LawsuitType lawsuitType) {
+        return LawSuit.builder()
+                .user(user)
+                .storedFileName(fileStorageResult.getStoredFileName())
+                .originalFileName(fileStorageResult.getOriginalFileName())
+                .lawsuitType(lawsuitType)
+                .expireTime(LocalDateTime.now().plusDays(30)) // 기본 만료 시간 설정
                 .build();
     }
 }

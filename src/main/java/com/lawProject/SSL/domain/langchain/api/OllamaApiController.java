@@ -3,6 +3,7 @@ package com.lawProject.SSL.domain.langchain.api;
 import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.langchain.service.OllamaApiClient;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
+import com.lawProject.SSL.domain.lawsuit.model.LawsuitType;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
@@ -73,6 +74,18 @@ public class OllamaApiController {
      */
     @PostMapping("/doc/make")
     public Mono<ResponseEntity<ApiResponse<FileStorageResult>>> makeDoc(@RequestBody MakeDocForm makeDocForm, HttpServletRequest request) {
+        // 소송 유형에 따라 입력값 검증
+        if (makeDocForm.getLawsuitType() == LawsuitType.CIVIL) {
+            if (makeDocForm.getClaimAmount() == null) {
+                return Mono.just(ApiResponse.onFailure(ErrorCode._INVALID_INPUT_VALUE));
+            }
+        } else if (makeDocForm.getLawsuitType() == LawsuitType.CRIMINAL) {
+            if (makeDocForm.getDamageScale() == null) {
+                return Mono.just(ApiResponse.onFailure(ErrorCode._INVALID_INPUT_VALUE));
+            }
+        } else {
+            return Mono.just(ApiResponse.onFailure(ErrorCode._INVALID_INPUT_VALUE));
+        }
 
         return ollamaApiClient.makeDoc(makeDocForm, request)
                 .map(fileStorageResult -> ApiResponse.onSuccess(SuccessCode._OK, fileStorageResult))
