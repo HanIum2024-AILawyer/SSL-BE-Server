@@ -12,7 +12,6 @@ import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.global.common.code.ErrorCode;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -39,10 +38,9 @@ public class OllamaApiClient {
     이렇게 하면 호출자가 메서드의 실행이 완료될 때까지 비동기적으로 기다릴 수 있다.
     *  */
     @Transactional
-    public Mono<ChatMessageDto.ChatResponse> sendQuestion(String roomId, HttpServletRequest request, String question) {
-        User user = userService.getUserInfo(request);
+    public Mono<ChatMessageDto.ChatResponse> sendQuestion(String roomId, User currentUser, String question) {
         // 사용자 질문 저장
-        chatMessageService.saveMessage(user, question, roomId, SenderType.USER);
+        chatMessageService.saveMessage(currentUser, question, roomId, SenderType.USER);
 
         ChatMessageDto.ChatRequest chatRequest = ChatMessageDto.ChatRequest.builder()
                 .roomId(roomId)
@@ -59,7 +57,7 @@ public class OllamaApiClient {
 
     /* 소송장 첨삭 메서드 */
     @Transactional
-    public Mono<FileStorageResult> fixDoc(MultipartFile file, HttpServletRequest request) {
+    public Mono<FileStorageResult> fixDoc(MultipartFile file, User currentUser) {
 
         if (!isWordFile(file)) {
             log.info("파일 형식이 올바르지 않습니다.");
@@ -71,43 +69,41 @@ public class OllamaApiClient {
                 .bodyValue(file)
                 .retrieve()
                 .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFile(request, resource));
+                .flatMap(resource -> savedFile(currentUser, resource));
     }
 
     /* 소송장 생성 메서드 */
-    public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, HttpServletRequest request) {
+    public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, User currentUser) {
         String docType = makeDocForm.getDoc_type();
         return webClient.post()
                 .uri("/ai/doc/make_doc")
                 .bodyValue(makeDocForm)
                 .retrieve()
                 .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFileWithType(request, resource, docType));
+                .flatMap(resource -> savedFileWithType(currentUser, resource, docType));
     }
 
     /* Using Method */
     // 파일 저장
-    private Mono<FileStorageResult> savedFileWithType(HttpServletRequest request, Resource fixedDocResource, String lawSuitType) {
+    private Mono<FileStorageResult> savedFileWithType(User currentUser, Resource fixedDocResource, String lawSuitType) {
         return Mono.fromCallable(() -> {
             FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
-            User user = userService.getUserInfo(request);
 
-            LawSuit lawSuit = LawSuit.ofUserWithType(user, fileStorageResult, lawSuitType);
+            LawSuit lawSuit = LawSuit.ofUserWithType(currentUser, fileStorageResult, lawSuitType);
             lawSuitRepository.save(lawSuit);
-            user.addLawsuit(lawSuit);
+            currentUser.addLawsuit(lawSuit);
 
             return fileStorageResult;
         });
     }
 
-    private Mono<FileStorageResult> savedFile(HttpServletRequest request, Resource fixedDocResource) {
+    private Mono<FileStorageResult> savedFile(User currentUser, Resource fixedDocResource) {
         return Mono.fromCallable(() -> {
             FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
-            User user = userService.getUserInfo(request);
 
-            LawSuit lawSuit = LawSuit.ofUser(user, fileStorageResult);
+            LawSuit lawSuit = LawSuit.ofUser(currentUser, fileStorageResult);
             lawSuitRepository.save(lawSuit);
-            user.addLawsuit(lawSuit);
+            currentUser.addLawsuit(lawSuit);
 
             return fileStorageResult;
         });
