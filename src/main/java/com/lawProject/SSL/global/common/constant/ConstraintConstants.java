@@ -23,6 +23,11 @@ public class ConstraintConstants {
     public static final String USERUUID_CLAIM = "userId";
     public static final String BEARER = "Bearer ";
 
+    /**
+     * LawSuit
+     */
+    public static final String CIVIL = "101";
+    public static final String CRIMINAL = "201";
 
 }
 

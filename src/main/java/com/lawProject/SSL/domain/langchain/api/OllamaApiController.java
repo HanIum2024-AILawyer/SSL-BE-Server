@@ -3,7 +3,6 @@ package com.lawProject.SSL.domain.langchain.api;
 import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.langchain.service.OllamaApiClient;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
-import com.lawProject.SSL.domain.lawsuit.model.LawsuitType;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
@@ -21,6 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+
+import static com.lawProject.SSL.global.common.constant.ConstraintConstants.CIVIL;
+import static com.lawProject.SSL.global.common.constant.ConstraintConstants.CRIMINAL;
 
 @Slf4j
 @RestController
@@ -75,12 +77,12 @@ public class OllamaApiController {
     @PostMapping("/doc/make")
     public Mono<ResponseEntity<ApiResponse<FileStorageResult>>> makeDoc(@RequestBody MakeDocForm makeDocForm, HttpServletRequest request) {
         // 소송 유형에 따라 입력값 검증
-        if (makeDocForm.getLawsuitType() == LawsuitType.CIVIL) {
-            if (makeDocForm.getClaimAmount() == null) {
+        if (makeDocForm.getDoc_type().equals(CIVIL)) { // 민사
+            if (makeDocForm.getClaim_amount() == null) {
                 return Mono.just(ApiResponse.onFailure(ErrorCode._INVALID_INPUT_VALUE));
             }
-        } else if (makeDocForm.getLawsuitType() == LawsuitType.CRIMINAL) {
-            if (makeDocForm.getDamageScale() == null) {
+        } else if (makeDocForm.getDoc_type().equals(CRIMINAL)) { // 민사
+            if (makeDocForm.getDamage_scale() == null) {
                 return Mono.just(ApiResponse.onFailure(ErrorCode._INVALID_INPUT_VALUE));
             }
         } else {
