@@ -114,10 +114,7 @@ public class OllamaApiClient {
         String originalFilename = file.getOriginalFilename();
         if (originalFilename != null) {
             String extension = getFileExtension(originalFilename);
-            return extension != null && (
-                    extension.equalsIgnoreCase("doc") ||
-                            extension.equalsIgnoreCase("docx")
-            );
+            return (extension.equalsIgnoreCase("doc") || extension.equalsIgnoreCase("docx"));
         }
         return false;
     }
