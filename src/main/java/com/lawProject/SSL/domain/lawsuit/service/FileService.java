@@ -75,7 +75,7 @@ public class FileService {
         return new FileStorageResult(originalFileName, storedFileName);
     }
 
-    public FileStorageResult saveFixedFile(Resource fixedDocResource) {
+    public FileStorageResult saveAiResponseFile(Resource fixedDocResource) {
         String originalFileName = fixedDocResource.getFilename();
         String storedFileName = createServerFileName(originalFileName);
 

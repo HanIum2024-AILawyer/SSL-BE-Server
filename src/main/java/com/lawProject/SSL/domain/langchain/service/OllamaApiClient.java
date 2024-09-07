@@ -2,6 +2,7 @@ package com.lawProject.SSL.domain.langchain.service;
 
 
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
+import com.lawProject.SSL.domain.langchain.dto.AiDto;
 import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
 import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
@@ -57,7 +58,7 @@ public class OllamaApiClient {
 
     /* 소송장 첨삭 메서드 */
     @Transactional
-    public Mono<FileStorageResult> fixDoc(MultipartFile file, User currentUser) {
+    public Mono<Object> fixDoc(MultipartFile file, User currentUser) {
 
         if (!isWordFile(file)) {
             log.info("파일 형식이 올바르지 않습니다.");
@@ -68,42 +69,39 @@ public class OllamaApiClient {
                 .uri("/api/doc/fix_doc")
                 .bodyValue(file)
                 .retrieve()
-                .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFile(currentUser, resource));
+                .bodyToMono(AiDto.AiDocResponse.class)
+                .flatMap(response ->
+                        savedAiResponseFile(currentUser, response, response.docType()));
     }
 
     /* 소송장 생성 메서드 */
-    public Mono<FileStorageResult> makeDoc(MakeDocForm makeDocForm, User currentUser) {
+    public Mono<Object> makeDoc(MakeDocForm makeDocForm, User currentUser) {
         String docType = makeDocForm.getDoc_type();
         return webClient.post()
                 .uri("/ai/doc/make_doc")
                 .bodyValue(makeDocForm)
                 .retrieve()
-                .bodyToMono(Resource.class)
-                .flatMap(resource -> savedFileWithType(currentUser, resource, docType));
+                .bodyToMono(AiDto.AiDocResponse.class)
+                .flatMap(response ->
+                        savedAiResponseFile(currentUser, response, docType));
     }
 
     /* Using Method */
-    // 파일 저장
-    private Mono<FileStorageResult> savedFileWithType(User currentUser, Resource fixedDocResource, String lawSuitType) {
+    // 파일 저장, 코멘트 추가
+    private Mono<Object> savedAiResponseFile(User currentUser, AiDto.AiDocResponse aiDocResponse, String lawSuitType) {
+
+
         return Mono.fromCallable(() -> {
-            FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
+            Resource file = aiDocResponse.wordFile();
+            FileStorageResult fileStorageResult = fileService.saveAiResponseFile(file);
 
             LawSuit lawSuit = LawSuit.ofUserWithType(currentUser, fileStorageResult, lawSuitType);
             lawSuitRepository.save(lawSuit);
             currentUser.addLawsuit(lawSuit);
 
-            return fileStorageResult;
-        });
-    }
-
-    private Mono<FileStorageResult> savedFile(User currentUser, Resource fixedDocResource) {
-        return Mono.fromCallable(() -> {
-            FileStorageResult fileStorageResult = fileService.saveFixedFile(fixedDocResource);
-
-            LawSuit lawSuit = LawSuit.ofUser(currentUser, fileStorageResult);
-            lawSuitRepository.save(lawSuit);
-            currentUser.addLawsuit(lawSuit);
+            if (!aiDocResponse.aiComment().isEmpty()) {
+                return AiDto.FileStorageResultWithComment.of(fileStorageResult, aiDocResponse.aiComment());
+            }
 
             return fileStorageResult;
         });
