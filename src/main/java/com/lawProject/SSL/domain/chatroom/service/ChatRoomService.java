@@ -12,6 +12,8 @@ import com.lawProject.SSL.global.common.response.PageInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -78,18 +80,29 @@ public class ChatRoomService {
 
     /* 채팅방 열기 메서드 - 채팅방 메시지도 조회 */
     public ChatRoomMessageWithPageInfoResponse openChatRoom(String roomId, int page, int size, User user) {
-        Page<ChatMessage> messages =
-                chatMessageService.getChatRoomMessages(roomId, page, size);
-        PageInfo pageInfo = new PageInfo(page, size, (int) messages.getTotalElements(), messages.getTotalPages());
-
         //TODO 채팅방 리스트도 반환하도록 수정
 //        List<String> chatRoomIdList = user.getChatRoomList().stream()
 //                .map(ChatRoom::getRoomId)
 //                .toList();
 
-        List<ChatMessageDto.ChatRoomMessageResponse> roomMessageResponses = messages.getContent().stream().map(
-                ChatMessageDto.ChatRoomMessageResponse::of
-        ).toList();
+        ChatRoom chatRoom = findByRoomId(roomId);
+
+        // ChatRoom에서 메시지 리스트를 가져옴
+        List<ChatMessage> messageList = chatRoom.getMessageList();
+
+        // 수동 페이징 처리
+        int start = Math.min(page * size, messageList.size());
+        int end = Math.min((page + 1) * size, messageList.size());
+        List<ChatMessage> pagedMessages = messageList.subList(start, end);
+
+        // Page 객체로 변환
+        Page<ChatMessage> messages = new PageImpl<>(pagedMessages, PageRequest.of(page, size), messageList.size());
+
+        PageInfo pageInfo = new PageInfo(page, size, (int) messages.getTotalElements(), messages.getTotalPages());
+
+        List<ChatMessageDto.ChatRoomMessageResponse> roomMessageResponses = messages.getContent().stream()
+                .map(ChatMessageDto.ChatRoomMessageResponse::of)
+                .toList();
 
         return ChatRoomMessageWithPageInfoResponse.of(roomMessageResponses, pageInfo, user.getId());
     }

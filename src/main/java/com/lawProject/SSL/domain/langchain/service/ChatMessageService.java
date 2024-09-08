@@ -1,11 +1,10 @@
 package com.lawProject.SSL.domain.langchain.service;
 
-import com.lawProject.SSL.domain.langchain.repository.ChatMessageRepository;
+import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
+import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
 import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
 import com.lawProject.SSL.domain.langchain.domain.SenderType;
-import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
-import com.lawProject.SSL.domain.chatroom.model.ChatRoom;
-import com.lawProject.SSL.domain.user.service.UserService;
+import com.lawProject.SSL.domain.langchain.repository.ChatMessageRepository;
 import com.lawProject.SSL.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +15,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @Slf4j
+@Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatMessageService {
-    private final UserService userService;
     private final ChatRoomService chatRoomService;
     private final ChatMessageRepository chatMessageRepository;
 
