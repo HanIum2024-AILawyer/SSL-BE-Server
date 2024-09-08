@@ -1,7 +1,7 @@
-package com.lawProject.SSL.domain.langchain.dto;
+package com.lawProject.SSL.domain.chatmessage.dto;
 
-import com.lawProject.SSL.domain.langchain.domain.ChatMessage;
-import com.lawProject.SSL.domain.langchain.domain.SenderType;
+import com.lawProject.SSL.domain.chatmessage.model.ChatMessage;
+import com.lawProject.SSL.domain.chatmessage.model.SenderType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

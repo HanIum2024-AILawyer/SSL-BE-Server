@@ -1,9 +1,10 @@
 package com.lawProject.SSL.domain.langchain.service;
 
 
-import com.lawProject.SSL.domain.langchain.domain.SenderType;
+import com.lawProject.SSL.domain.chatmessage.model.SenderType;
+import com.lawProject.SSL.domain.chatmessage.service.ChatMessageService;
 import com.lawProject.SSL.domain.langchain.dto.AiDto;
-import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
+import com.lawProject.SSL.domain.chatmessage.dto.ChatMessageDto;
 import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
