@@ -1,13 +1,11 @@
 package com.lawProject.SSL.domain.chatroom.api;
 
-import com.lawProject.SSL.domain.chatroom.dto.ChatRoomDto;
 import com.lawProject.SSL.domain.chatroom.exception.ChatRoomException;
 import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.annotation.CurrentUser;
 import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,18 +36,6 @@ public class ChatRoomController {
         // 이때 프론트엔드는 roomId를 뽑아서 해당 채팅방을 "stompClient.subscribe('/sub/chats/' + roomId, function(message)" 처럼 구독해야 됨
 
         return ApiResponse.onSuccess(SuccessCode._CREATED, location);
-    }
-
-    // 채팅방 열기
-    @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<Object>> openChatRoom(@PathVariable("roomId") String roomId,
-                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "30") int size,
-                                                                       @CurrentUser User user
-    ) {
-        ChatRoomDto.ChatRoomMessageWithPageInfoResponse chatRoomMessageWithPageInfoResponse = chatRoomService.openChatRoom(roomId, page, size, user);
-
-        return ApiResponse.onSuccess(SuccessCode._OK, chatRoomMessageWithPageInfoResponse);
     }
 
     @DeleteMapping("/{roomId}")
