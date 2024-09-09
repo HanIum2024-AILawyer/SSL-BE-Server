@@ -63,7 +63,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return switch (provider) {
             case "google" -> new GoogleUserInfo(attributes);
             case "kakao" -> new KaKaoUserInfo(attributes);
-            case "naver" -> new NaverUserInfo(attributes);
+            case "naver" -> new NaverUserInfo((Map<String, Object>) attributes.get("response"));
             default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
         };
     }
