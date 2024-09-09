@@ -1,13 +1,11 @@
 package com.lawProject.SSL.domain.chatroom.api;
 
-import com.lawProject.SSL.domain.chatroom.dto.ChatRoomDto;
 import com.lawProject.SSL.domain.chatroom.exception.ChatRoomException;
 import com.lawProject.SSL.domain.chatroom.service.ChatRoomService;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.annotation.CurrentUser;
 import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +23,7 @@ import java.net.URI;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
-    // 채팅방 생성
+    /* 채팅방 생성 */
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> createRoom(@CurrentUser User user) {
         String roomId = chatRoomService.createRoom(user);
@@ -40,18 +38,7 @@ public class ChatRoomController {
         return ApiResponse.onSuccess(SuccessCode._CREATED, location);
     }
 
-    // 채팅방 열기
-    @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<Object>> openChatRoom(@PathVariable("roomId") String roomId,
-                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "30") int size,
-                                                                       @CurrentUser User user
-    ) {
-        ChatRoomDto.ChatRoomMessageWithPageInfoResponse chatRoomMessageWithPageInfoResponse = chatRoomService.openChatRoom(roomId, page, size, user);
-
-        return ApiResponse.onSuccess(SuccessCode._OK, chatRoomMessageWithPageInfoResponse);
-    }
-
+    /* 채팅방 삭제 */
     @DeleteMapping("/{roomId}")
     public Mono<ResponseEntity<String>> deleteChatRoom(@PathVariable("roomId") String roomId,
                                                        @CurrentUser User user) {

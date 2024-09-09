@@ -59,7 +59,8 @@ public class LawyerDto {
             String phoneNumber, //핸드폰 번호
             String faxNumber, //팩스 번호
             String emailAddress, //이메일 주소
-            String tagName //태그
+            String tagName, //태그
+            String imageName // 이미지 이름
     ) {
         public static LawyerDetailResponse of(Lawyer lawyer) {
             return LawyerDetailResponse.builder()
@@ -72,6 +73,7 @@ public class LawyerDto {
                     .faxNumber(lawyer.getContactInfo().getFaxNumber())
                     .emailAddress(lawyer.getContactInfo().getEmailAddress())
                     .tagName(lawyer.getHashTag().getTagName())
+                    .imageName(lawyer.getImage().getImageName())
                     .build();
         }
     }

@@ -1,9 +1,10 @@
 package com.lawProject.SSL.domain.langchain.service;
 
 
-import com.lawProject.SSL.domain.langchain.domain.SenderType;
+import com.lawProject.SSL.domain.chatmessage.model.SenderType;
+import com.lawProject.SSL.domain.chatmessage.service.ChatMessageService;
 import com.lawProject.SSL.domain.langchain.dto.AiDto;
-import com.lawProject.SSL.domain.langchain.dto.ChatMessageDto;
+import com.lawProject.SSL.domain.chatmessage.dto.ChatMessageDto;
 import com.lawProject.SSL.domain.langchain.dto.MakeDocForm;
 import com.lawProject.SSL.domain.lawsuit.dto.FileStorageResult;
 import com.lawProject.SSL.domain.lawsuit.exception.FileException;
@@ -11,7 +12,6 @@ import com.lawProject.SSL.domain.lawsuit.model.LawSuit;
 import com.lawProject.SSL.domain.lawsuit.repository.LawSuitRepository;
 import com.lawProject.SSL.domain.lawsuit.service.FileService;
 import com.lawProject.SSL.domain.user.model.User;
-import com.lawProject.SSL.domain.user.service.UserService;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OllamaApiClient {
     private final WebClient webClient;
-    private final ChatMessageService chatMessageService;
-    private final UserService userService;
     private final FileService fileService;
+    private final ChatMessageService chatMessageService;
     private final LawSuitRepository lawSuitRepository;
 
     /** AI 질의응답 메서드

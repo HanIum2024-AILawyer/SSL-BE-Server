@@ -3,6 +3,7 @@ package com.lawProject.SSL.global.config;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
+    @Value("${ai.url}")
+    private String aiUrl;
+
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
         HttpClient httpClient = HttpClient.create()
@@ -26,7 +30,7 @@ public class WebClientConfig {
                         conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
                                 .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
         return builder
-                .baseUrl("http://domain") // 고옽ㅇurl 설정, 추후 AI 연결 도메인이 들어갈 예정
+                .baseUrl(aiUrl) // 공통 url 설정, 추후 AI 연결 도메인이 들어갈 예정
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) // 공통 헤더 설정
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();

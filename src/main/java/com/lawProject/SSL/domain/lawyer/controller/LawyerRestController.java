@@ -51,14 +51,24 @@ public class LawyerRestController {
         return ApiResponse.onSuccess(SuccessCode._OK, lawyerDetailResponse);
     }
 
+    /* 변호사 정보 수정 - 정보 가져오기 */
+    @GetMapping("/admin/lawyers/{lawyerId}")
+    public ResponseEntity<ApiResponse<Object>> getModifyLawyerInfo(
+            @PathVariable Long lawyerId) {
+
+        LawyerDetailResponse modifyLawyerInfo = lawyerService.getModifyLawyerInfo(lawyerId);
+
+        return ApiResponse.onSuccess(SuccessCode._OK, modifyLawyerInfo);
+    }
+
     /* 변호사 정보 수정 */
     @PutMapping("/admin/lawyers/{lawyerId}")
-    public ResponseEntity<ApiResponse<Object>> updateLawyer(
+    public ResponseEntity<ApiResponse<Object>> ModifyLawyer(
             @PathVariable Long lawyerId,
             @RequestPart(name = "request") LawyerCreateRequest request,
             @RequestPart(name = "image", required = false) MultipartFile image) {
 
-        lawyerService.updateLawyer(lawyerId, request, image);
+        lawyerService.modifyLawyer(lawyerId, request, image);
 
         return ApiResponse.onSuccess(SuccessCode._OK);
     }

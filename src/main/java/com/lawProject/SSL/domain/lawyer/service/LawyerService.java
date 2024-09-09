@@ -2,6 +2,7 @@ package com.lawProject.SSL.domain.lawyer.service;
 
 import com.lawProject.SSL.domain.image.model.Image;
 import com.lawProject.SSL.domain.image.service.ImageService;
+import com.lawProject.SSL.domain.lawyer.dto.LawyerDto;
 import com.lawProject.SSL.domain.lawyer.exception.LawyerException;
 import com.lawProject.SSL.domain.lawyer.model.Address;
 import com.lawProject.SSL.domain.lawyer.model.ContactInfo;
@@ -46,9 +47,16 @@ public class LawyerService {
         }
     }
 
-    /* 변호사 정보 업데이트 메서드 */
+    /* 변호사 정보 수정/가져오기 메서드 */
+    public LawyerDto.LawyerDetailResponse getModifyLawyerInfo(Long lawyerId) {
+        Lawyer findLawyer = findById(lawyerId);
+
+        return LawyerDto.LawyerDetailResponse.of(findLawyer);
+    }
+
+    /* 변호사 정보 수정 메서드 */
     @Transactional
-    public void updateLawyer(Long lawyerId, LawyerCreateRequest request, MultipartFile image) { //Param: 파리미터로 넘어온 준영속 상태의 엔티티
+    public void modifyLawyer(Long lawyerId, LawyerCreateRequest request, MultipartFile image) { //Param: 파리미터로 넘어온 준영속 상태의 엔티티
         Lawyer findLawyer = findById(lawyerId);
 
         Address address = Address.builder()
@@ -123,7 +131,9 @@ public class LawyerService {
                 .faxNumber(request.faxNumber())
                 .emailAddress(request.emailAddress())
                 .build();
-        HashTag hashTag = HashTag.builder().build();
+        HashTag hashTag = HashTag.builder()
+                .tagName(request.tagName())
+                .build();
 
         return Lawyer.builder()
                 .name(request.name())
