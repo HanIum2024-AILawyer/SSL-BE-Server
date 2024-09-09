@@ -23,7 +23,7 @@ import java.net.URI;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
-    // 채팅방 생성
+    /* 채팅방 생성 */
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> createRoom(@CurrentUser User user) {
         String roomId = chatRoomService.createRoom(user);
@@ -38,6 +38,7 @@ public class ChatRoomController {
         return ApiResponse.onSuccess(SuccessCode._CREATED, location);
     }
 
+    /* 채팅방 삭제 */
     @DeleteMapping("/{roomId}")
     public Mono<ResponseEntity<String>> deleteChatRoom(@PathVariable("roomId") String roomId,
                                                        @CurrentUser User user) {

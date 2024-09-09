@@ -18,6 +18,9 @@ application.properties
 **/application-security.yml
 **/application-redis.yml
 
+# 상수 파일 무시
+**/constance.env
+
 ### STS ###
 .apt_generated
 .classpath
