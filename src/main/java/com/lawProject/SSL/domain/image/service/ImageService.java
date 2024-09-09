@@ -24,7 +24,7 @@ public class ImageService {
 
     private final Path fileStorageLocation;
 
-    public ImageService(@Value("${file.dir}") String uploadDir) {
+    public ImageService(@Value("${image.dir}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
     }
 
