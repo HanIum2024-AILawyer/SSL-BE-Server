@@ -123,7 +123,9 @@ public class LawyerService {
                 .faxNumber(request.faxNumber())
                 .emailAddress(request.emailAddress())
                 .build();
-        HashTag hashTag = HashTag.builder().build();
+        HashTag hashTag = HashTag.builder()
+                .tagName(request.tagName())
+                .build();
 
         return Lawyer.builder()
                 .name(request.name())
