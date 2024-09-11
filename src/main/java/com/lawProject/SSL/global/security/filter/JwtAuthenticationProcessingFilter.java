@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,10 +21,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * OncePerRequestFilter: 모든 서블릿 컨테이너에서 요청 디스패치당 단일 실행을 보장하는 것을 목표로 하는 필터 기본 클래스
  */
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Value("${jwt.access-token.header}")
@@ -58,26 +61,30 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      * 유효하지 않다면 accessToken을 재발급하고, 재발급 된 accessToken을 헤더에 실어 다음 필터로 보낸다.
      */
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = jwtUtil.extractAccessToken(request).get();
+        try {
+            Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
+            String accessToken = accessTokenOpt.orElse("");
 
-        if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 만료되지 않았다면
-            String userId = jwtUtil.extractUserId(accessToken);
-            userRepository.findByUserId(userId).ifPresent(
-                    this::saveAuthentication);
-        } else { // 토큰이 만료되었다면
-            String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
+            if (StringUtils.hasText(accessToken)) {
+                if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 유효하다면
+                    String userId = jwtUtil.extractUserId(accessToken);
+                    userRepository.findByUserId(userId).ifPresent(this::saveAuthentication);
+                } else { // 토큰이 만료되었다면
+                    String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
 
-            if (StringUtils.hasText(reissueAccessToken)) {
-                String userId = jwtUtil.extractUserId(reissueAccessToken);
-                userRepository.findByUserId(userId).ifPresent(
-                        this::saveAuthentication);
-
-                response.setHeader(AUTHORIZATION, reissueAccessToken);
+                    if (StringUtils.hasText(reissueAccessToken)) {
+                        String userId = jwtUtil.extractUserId(reissueAccessToken);
+                        userRepository.findByUserId(userId).ifPresent(this::saveAuthentication);
+                        response.setHeader(AUTHORIZATION, reissueAccessToken);
+                    }
+                }
             }
 
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            // 예외를 로깅하고, 적절한 응답을 설정합니다.
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Token error");
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private void saveAuthentication(User user) {
