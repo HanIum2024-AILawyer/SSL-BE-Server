@@ -18,6 +18,7 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -60,9 +61,14 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         log.info("Refresh Token: {}", refreshToken);
         log.info("Access Token: {}", accessToken);
 
-        jwtUtil.sendAccessAndRefreshToken(response, accessToken, refreshToken);
-        // 토큰 정보를 포함한 리다이렉트 URL 생성
-        String redirectUrl = REDIRECT_URI + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
-        redirectStrategy.sendRedirect(request, response, redirectUrl);
+//        jwtUtil.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+//         토큰 정보를 포함한 리다이렉트 URL 생성
+//        String redirectUrl = REDIRECT_URI + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
+//        redirectStrategy.sendRedirect(request, response, redirectUrl);
+//
+        String redirectUrl = UriComponentsBuilder.fromUriString(REDIRECT_URI)
+                .queryParam("accessToken", accessToken)
+                .build().toUriString();
+        response.sendRedirect(redirectUrl);
     }
 }
