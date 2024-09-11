@@ -1,8 +1,6 @@
 package com.lawProject.SSL.global.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
@@ -32,10 +30,8 @@ import java.util.Collections;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final BlacklistedTokenRepository blacklistedTokenRepository;
+    private final TokenRepository tokenRepository;
     private final JwtUtil jwtService;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
@@ -80,7 +76,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
 
-        return new JwtAuthenticationProcessingFilter(jwtService, userRepository, refreshTokenRepository, blacklistedTokenRepository);
+        return new JwtAuthenticationProcessingFilter(jwtService, userRepository);
     }
 
     @Bean

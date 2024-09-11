@@ -2,12 +2,14 @@ package com.lawProject.SSL.global.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lawProject.SSL.domain.token.exception.TokenException;
+import com.lawProject.SSL.domain.token.model.Token;
 import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
-import com.lawProject.SSL.domain.user.repository.UserRepository;
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
+import com.lawProject.SSL.domain.token.service.TokenService;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,8 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.lawProject.SSL.global.common.constant.ConstraintConstants.*;
 
@@ -44,8 +50,8 @@ public class JwtUtilImpl implements JwtUtil {
 
     private final UserRepository userRepository;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
-    private ObjectMapper objectMapper;
-
+    private final TokenRepository tokenRepository;
+    private final TokenService tokenService;
 
     @Override
     public String createAccessToken(String userId) {
@@ -57,13 +63,30 @@ public class JwtUtilImpl implements JwtUtil {
     }
 
     @Override
-    public String createRefreshToken(String userId) {
-        return JWT.create()
+    public void createRefreshToken(String userId, String accessToken) {
+        String refreshToken = JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenValidityInSeconds))
                 .withClaim(USERUUID_CLAIM, userId)
                 .sign(Algorithm.HMAC512(secret));
-        // RefreshToken의 목적은 액세스 토큰의 갱신이기 때문에 클레임 포함X
+
+        tokenService.saveOrUpdate(userId, refreshToken, accessToken);
+    }
+
+    /* 토큰 재발급 */
+    @Override
+    public String reissueAccessToken(String accessToken) {
+        if (StringUtils.hasText(accessToken)) {
+            Token token = tokenService.findByAccessTokenOrThrow(accessToken);
+            String refreshToken = token.getRefreshToken();
+
+            if (isTokenValid(refreshToken)) {
+                String reissueAccessToken = createAccessToken(extractUserId(refreshToken));
+                tokenService.updateAccessToken(reissueAccessToken, token);
+                return reissueAccessToken;
+            }
+        }
+        return null;
     }
 
     // HTTPServletResponse를 사용하여 클라이언트에게 AccessToken, RefreshToken을 전송하는 메서드

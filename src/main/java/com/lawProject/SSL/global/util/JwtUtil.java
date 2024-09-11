@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface JwtUtil {
     String createAccessToken(String userId); // AccessToken 생성
-    String createRefreshToken(String userId); // RefreshToken 생성 - 보안, I/O 감소 이유로 사용
+    void createRefreshToken(String userId, String accessToken); // RefreshToken 생성 - 보안, I/O 감소 이유로 사용
 
 //    void updateRefreshToken(UUID userId, String refreshToken); // RefreshToken 갱신
 //
@@ -30,4 +30,6 @@ public interface JwtUtil {
     boolean isTokenValid(String token);
 
     User getUserFromRequest(HttpServletRequest request);
+
+    String reissueAccessToken(String accessToken);
 }

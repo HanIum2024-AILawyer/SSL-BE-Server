@@ -1,8 +1,8 @@
 package com.lawProject.SSL.global.oauth.service;
 
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.repository.UserRepository;
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.oauth.info.GoogleUserInfo;
 import com.lawProject.SSL.global.oauth.info.KaKaoUserInfo;
 import com.lawProject.SSL.global.oauth.info.NaverUserInfo;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -39,13 +39,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (existUser != null) {
             user = existUser;
             log.info("기존 유저입니다.");
-            refreshTokenRepository.deleteByUserId(user.getUserId());
+            tokenRepository.deleteByUserId(user.getUserId());
         } else {
             log.info("신규 유저입니다. 등록을 진행합니다.");
             user  = createUser(oAuth2UserInfo);
             userRepository.save(user);
         }
-//                .orElseGet(() -> createUser(oAuth2UserInfo));
 
         return new CustomOAuth2User(user, oAuth2User.getAttributes());
     }

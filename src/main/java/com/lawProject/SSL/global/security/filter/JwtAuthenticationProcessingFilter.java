@@ -1,15 +1,14 @@
 package com.lawProject.SSL.global.security.filter;
 
-import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -17,6 +16,7 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,10 +26,11 @@ import java.io.IOException;
  */
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
+    @Value("${jwt.access-token.header}")
+    private String AUTHORIZATION;
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -51,15 +52,30 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
+    /**
+     * request 헤더에서 accessToken을 가져온 뒤 유효한지 검증한다.
+     * 유효하다면 인증 객체를 생성하고 요청을 다음 필터로 보낸다.
+     * 유효하지 않다면 accessToken을 재발급하고, 재발급 된 accessToken을 헤더에 실어 다음 필터로 보낸다.
+     */
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        jwtUtil.extractAccessToken(request).filter(jwtUtil::isTokenValid).ifPresent(
-                accessToken -> {
-                    String userId = jwtUtil.extractUserId(accessToken);
-                    userRepository.findByUserId(userId).ifPresent(
-                            this::saveAuthentication
-                    );
-                }
-        );
+        String accessToken = jwtUtil.extractAccessToken(request).get();
+
+        if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 만료되지 않았다면
+            String userId = jwtUtil.extractUserId(accessToken);
+            userRepository.findByUserId(userId).ifPresent(
+                    this::saveAuthentication);
+        } else { // 토큰이 만료되었다면
+            String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
+
+            if (StringUtils.hasText(reissueAccessToken)) {
+                String userId = jwtUtil.extractUserId(reissueAccessToken);
+                userRepository.findByUserId(userId).ifPresent(
+                        this::saveAuthentication);
+
+                response.setHeader(AUTHORIZATION, reissueAccessToken);
+            }
+
+        }
 
         filterChain.doFilter(request, response);
     }
