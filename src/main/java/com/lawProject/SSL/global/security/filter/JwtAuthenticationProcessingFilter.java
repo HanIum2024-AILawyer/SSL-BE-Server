@@ -1,7 +1,8 @@
 package com.lawProject.SSL.global.security.filter;
 
-import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.domain.user.repository.UserRepository;
+import com.lawProject.SSL.global.oauth.dto.UserDTO;
+import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,9 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -47,7 +46,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         System.out.println("Received request URI: " + requestURI);
-        if (requestURI.equals(NO_CHECK_URL)) {
+        if (requestURI.equals(NO_CHECK_URL) || request.getHeader(AUTHORIZATION).isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -68,13 +67,24 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(accessToken)) {
                 if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 유효하다면
                     String username = jwtUtil.extractUsername(accessToken);
-                    userRepository.findByUsername(username).ifPresent(this::saveAuthentication);
+                    String role = jwtUtil.extractRole(accessToken);
+                    UserDTO userDTO = new UserDTO(username, role);
+
+                    //UserDetails에 회원 정보 객체 담기
+                    CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
+                    saveAuthentication(customOAuth2User);
                 } else { // 토큰이 만료되었다면
                     String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
 
                     if (StringUtils.hasText(reissueAccessToken)) {
                         String username = jwtUtil.extractUsername(reissueAccessToken);
-                        userRepository.findByUsername(username).ifPresent(this::saveAuthentication);
+                        String role = jwtUtil.extractRole(reissueAccessToken);
+                        UserDTO userDTO = new UserDTO(username, role);
+
+                        //UserDetails에 회원 정보 객체 담기
+                        CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
+                        saveAuthentication(customOAuth2User);
+
                         response.setHeader(AUTHORIZATION, reissueAccessToken);
                     }
                 }
@@ -87,21 +97,12 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
     }
 
-    private void saveAuthentication(User user) {
-        UserDetails userDetails = createUserDetails(user);
+    private void saveAuthentication(CustomOAuth2User customOAuth2User) {
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
+        // Spring Security 인증 토큰 생성
+        Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
-    }
-
-    private static UserDetails createUserDetails(User user) {
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getName())
-                .password("") // 비밀번호 필드는 일반적으로 사용되지 않지만 빈 문자열로 설정
-                .roles(user.getRole().name())
-                .build();
+        // 세션에 사용자 등록
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

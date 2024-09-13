@@ -40,7 +40,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String role = auth.getAuthority();
 
         // Access Token 발급
-        String accessToken = jwtUtil.createAccessToken(username);
+        String accessToken = jwtUtil.createAccessToken(username, role);
         log.info("Access Token: {}", accessToken);
         // Refresh Token 발급 후 저장
         jwtUtil.createRefreshToken(username, accessToken);

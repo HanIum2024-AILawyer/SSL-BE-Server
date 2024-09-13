@@ -54,11 +54,12 @@ public class JwtUtilImpl implements JwtUtil {
     private final TokenService tokenService;
 
     @Override
-    public String createAccessToken(String username) {
+    public String createAccessToken(String username, String role) {
         return JWT.create() // JWT 생성 빌더를 초기화
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject를 설정한다. subject는 토큰의 목적, 주제를 나타냄.
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessTokenValidityInSeconds)) // 만료 시간 설정
                 .withClaim(USERNAME_CLAIM, username) // 토큰에 Username 정보를 클레임으로 추가
+                .withClaim(ROLE_CLAIM, role)
                 .sign(Algorithm.HMAC512(secret)); // HMAC512 알고리즘을 사용하여, 토큰에 서명. 서명 키: secret 변수로 설정된 값
     }
 
@@ -135,6 +136,20 @@ public class JwtUtilImpl implements JwtUtil {
                             .verify(token)
                             .getClaim(USERNAME_CLAIM)
                             .asString();
+        } catch (Exception e) {
+            log.info("유효하지 않은 토큰입니다. 이유: {}", e.getMessage());
+            throw new TokenException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    @Override
+    public String extractRole(String token) {
+        try {
+            return JWT.require(Algorithm.HMAC512(secret))
+                    .build()
+                    .verify(token)
+                    .getClaim(ROLE_CLAIM)
+                    .asString();
         } catch (Exception e) {
             log.info("유효하지 않은 토큰입니다. 이유: {}", e.getMessage());
             throw new TokenException(ErrorCode.INVALID_TOKEN);

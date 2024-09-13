@@ -15,9 +15,9 @@ public interface JwtUtil {
 
     Optional<String> extractAccessToken(HttpServletRequest request);
 
-    Optional<String> extractRefreshToken(HttpServletRequest request);
-
     String extractUsername(String accessToken);
+
+    String extractRole(String accessToken);
 
     void setAccessTokenHeader(HttpServletResponse response, String accessToken);
 
