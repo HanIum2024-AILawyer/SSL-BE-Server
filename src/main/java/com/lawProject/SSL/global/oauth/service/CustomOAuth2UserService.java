@@ -49,7 +49,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             log.info("기존 유저입니다.");
             user = existUser.get();
-//            tokenRepository.deleteByUsername(user.getUsername());
+            userRepository.save(user);
+
+            tokenRepository.deleteByUsername(user.getUsername());
             UserDTO userDTO = new UserDTO(user.getUsername(), oAuth2UserInfo.getName(), user.getRole().toString());
 
             return new CustomOAuth2User(userDTO);

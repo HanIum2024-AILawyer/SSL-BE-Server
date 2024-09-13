@@ -18,10 +18,10 @@ public class Token {
     @Column(name = "username", unique = true)
     private String username;
 
-    @Column(name = "refreshToken", nullable = false)
+    @Column(name = "refreshToken", nullable = false, length = 500)
     private String refreshToken;
 
-    @Column(name = "accessToken", nullable = false)
+    @Column(name = "accessToken", nullable = false, length = 500)
     private String accessToken;
 
     public Token updateRefreshToken(String refreshToken) {
