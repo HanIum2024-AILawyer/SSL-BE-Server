@@ -25,8 +25,8 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "userId", unique = true)
-    private String userId;
+    @Column(name = "username", unique = true)
+    private String username;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -44,8 +44,8 @@ public class User extends BaseEntity {
     private List<ChatRoom> chatRoomList = new ArrayList<>();
 
     @Builder
-    public User(String userId, String name, String provider, String providerId) {
-        this.userId = userId;
+    public User(String username, String name) {
+        this.username = username;
         this.name = name;
     }
 

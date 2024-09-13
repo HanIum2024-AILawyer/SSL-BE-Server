@@ -15,8 +15,8 @@ public class Token {
     @Column(name = "refresh_tokens_id")
     private Long id;
 
-    @Column(name = "users_uuid", columnDefinition = "VARCHAR(36)", unique = true)
-    private String userId;
+    @Column(name = "username", unique = true)
+    private String username;
 
     @Column(name = "refreshToken", nullable = false)
     private String refreshToken;
@@ -33,8 +33,8 @@ public class Token {
         this.accessToken = accessToken;
     }
 
-    public Token(String userId, String refreshToken, String accessToken) {
-        this.userId = userId;
+    public Token(String username, String refreshToken, String accessToken) {
+        this.username = username;
         this.refreshToken = refreshToken;
         this.accessToken = accessToken;
     }

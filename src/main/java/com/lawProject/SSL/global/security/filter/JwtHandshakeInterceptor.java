@@ -24,8 +24,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 //        String token = request.getHeaders().getFirst("Authorization");
         String token = jwtUtil.extractAccessToken((HttpServletRequest) request).get();
         if (token != null && jwtUtil.isTokenValid(token)) {
-            String userId = jwtUtil.extractUserId(token);
-            attributes.put("userId", userId); // WebSocketSession의 속성에 사용자 ID 저장
+            String username = jwtUtil.extractUsername(token);
+            attributes.put("username", username); // WebSocketSession의 속성에 사용자 ID 저장
             return true;
         }
         return false;

@@ -33,8 +33,8 @@ public class OAuthLogoutHandler implements LogoutHandler, LogoutSuccessHandler {
             blacklistedTokenRepository.save(new BlacklistedToken(accessToken));
         }
 
-        String userId = jwtUtil.extractUserId(accessToken);
-        tokenRepository.deleteByUserId(userId);
+        String username = jwtUtil.extractUsername(accessToken);
+        tokenRepository.deleteByUsername(username);
 
         log.info("User logged out and token invalidated");
     }

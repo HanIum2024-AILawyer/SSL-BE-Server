@@ -54,23 +54,23 @@ public class JwtUtilImpl implements JwtUtil {
     private final TokenService tokenService;
 
     @Override
-    public String createAccessToken(String userId) {
+    public String createAccessToken(String username) {
         return JWT.create() // JWT 생성 빌더를 초기화
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject를 설정한다. subject는 토큰의 목적, 주제를 나타냄.
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessTokenValidityInSeconds)) // 만료 시간 설정
-                .withClaim(USERUUID_CLAIM, userId) // 토큰에 UserId 정보를 클레임으로 추가
+                .withClaim(USERNAME_CLAIM, username) // 토큰에 Username 정보를 클레임으로 추가
                 .sign(Algorithm.HMAC512(secret)); // HMAC512 알고리즘을 사용하여, 토큰에 서명. 서명 키: secret 변수로 설정된 값
     }
 
     @Override
-    public void createRefreshToken(String userId, String accessToken) {
+    public void createRefreshToken(String username, String accessToken) {
         String refreshToken = JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenValidityInSeconds))
-                .withClaim(USERUUID_CLAIM, userId)
+                .withClaim(USERNAME_CLAIM, username)
                 .sign(Algorithm.HMAC512(secret));
 
-        tokenService.saveOrUpdate(userId, refreshToken, accessToken);
+        tokenService.saveOrUpdate(username, refreshToken, accessToken);
     }
 
     /* 토큰 재발급 */
@@ -81,7 +81,7 @@ public class JwtUtilImpl implements JwtUtil {
             String refreshToken = token.getRefreshToken();
 
             if (isTokenValid(refreshToken)) {
-                String reissueAccessToken = createAccessToken(extractUserId(refreshToken));
+                String reissueAccessToken = createAccessToken(extractUsername(refreshToken));
                 tokenService.updateAccessToken(reissueAccessToken, token);
                 return reissueAccessToken;
             }
@@ -128,12 +128,12 @@ public class JwtUtilImpl implements JwtUtil {
     }
 
     @Override
-    public String extractUserId(String token) {
+    public String extractUsername(String token) {
         try {
             return JWT.require(Algorithm.HMAC512(secret))
                             .build()
                             .verify(token)
-                            .getClaim(USERUUID_CLAIM)
+                            .getClaim(USERNAME_CLAIM)
                             .asString();
         } catch (Exception e) {
             log.info("유효하지 않은 토큰입니다. 이유: {}", e.getMessage());
@@ -170,9 +170,9 @@ public class JwtUtilImpl implements JwtUtil {
     // Request 에서 유저를 반환하는 메서드
     public User getUserFromRequest(HttpServletRequest request) {
         String accessToken = extractAccessToken(request).orElseThrow(() -> new TokenException(ErrorCode.INVALID_ACCESS_TOKEN));
-        String userId = extractUserId(accessToken);
+        String username = extractUsername(accessToken);
 
-        return userRepository.findByUserId(userId)
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
     }
 }

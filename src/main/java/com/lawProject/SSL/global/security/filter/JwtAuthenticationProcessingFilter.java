@@ -67,14 +67,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(accessToken)) {
                 if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 유효하다면
-                    String userId = jwtUtil.extractUserId(accessToken);
-                    userRepository.findByUserId(userId).ifPresent(this::saveAuthentication);
+                    String username = jwtUtil.extractUsername(accessToken);
+                    userRepository.findByUsername(username).ifPresent(this::saveAuthentication);
                 } else { // 토큰이 만료되었다면
                     String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
 
                     if (StringUtils.hasText(reissueAccessToken)) {
-                        String userId = jwtUtil.extractUserId(reissueAccessToken);
-                        userRepository.findByUserId(userId).ifPresent(this::saveAuthentication);
+                        String username = jwtUtil.extractUsername(reissueAccessToken);
+                        userRepository.findByUsername(username).ifPresent(this::saveAuthentication);
                         response.setHeader(AUTHORIZATION, reissueAccessToken);
                     }
                 }

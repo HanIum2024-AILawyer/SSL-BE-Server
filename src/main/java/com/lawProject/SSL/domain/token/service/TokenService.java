@@ -20,10 +20,10 @@ public class TokenService {
 
     /* 리프레쉬 토큰 업데이트 또는 토큰 생성 후 저장 */
     @Transactional
-    public void saveOrUpdate(String userId, String refreshToken, String accessToken) {
+    public void saveOrUpdate(String username, String refreshToken, String accessToken) {
         Token token = tokenRepository.findByAccessToken(accessToken)
                 .map(t -> t.updateRefreshToken(refreshToken))
-                .orElseGet(() -> new Token(userId, refreshToken, accessToken));
+                .orElseGet(() -> new Token(username, refreshToken, accessToken));
 
         tokenRepository.save(token);
     }
@@ -44,8 +44,8 @@ public class TokenService {
     }
 
     /* 토큰이 존재하는지, 일치하는지, 유효한지 검증 */
-    private void validateRefreshToken(String userId, String refreshToken) {
-        Optional<Token> existRefreshTokenOpt = tokenRepository.findByUserId(userId);
+    private void validateRefreshToken(String username, String refreshToken) {
+        Optional<Token> existRefreshTokenOpt = tokenRepository.findByUsername(username);
         if (!existRefreshTokenOpt.isPresent()) {
             throw new TokenException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }

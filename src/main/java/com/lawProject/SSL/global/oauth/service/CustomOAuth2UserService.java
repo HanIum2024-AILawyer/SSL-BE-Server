@@ -34,32 +34,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // OAuth2 서비스 id (google, kakao, naver)
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(provider, oAuth2User.getAttributes());
-        String userId = oAuth2UserInfo.getProvider() + " " + oAuth2UserInfo.getProviderId();
+        String username = oAuth2UserInfo.getProvider() + " " + oAuth2UserInfo.getProviderId();
 
-        Optional<User> existUser = userRepository.findByUserId(userId);
+        Optional<User> existUser = userRepository.findByUsername(username);
         User user;
         if (existUser.isEmpty()) {
             log.info("신규 유저입니다. 등록을 진행합니다.");
-            user  = createUser(userId, oAuth2UserInfo);
+            user  = createUser(username, oAuth2UserInfo);
             userRepository.save(user);
 
-            UserDTO userDTO = new UserDTO(userId, oAuth2UserInfo.getName(), "USER");
+            UserDTO userDTO = new UserDTO(username, oAuth2UserInfo.getName(), "USER");
 
             return new CustomOAuth2User(userDTO);
         } else {
             log.info("기존 유저입니다.");
             user = existUser.get();
-//            tokenRepository.deleteByUserId(user.getUserId());
-            UserDTO userDTO = new UserDTO(user.getUserId(), oAuth2UserInfo.getName(), user.getRole().toString());
+//            tokenRepository.deleteByUsername(user.getUsername());
+            UserDTO userDTO = new UserDTO(user.getUsername(), oAuth2UserInfo.getName(), user.getRole().toString());
 
             return new CustomOAuth2User(userDTO);
         }
     }
 
     /* User 생성 메서드 */
-    private User createUser(String userId, OAuth2UserInfo oAuth2UserInfo) {
+    private User createUser(String username, OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()
-                .userId(userId)
+                .username(username)
                 .name(oAuth2UserInfo.getName())
                 .build();
     }
