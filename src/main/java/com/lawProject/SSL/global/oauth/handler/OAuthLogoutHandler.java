@@ -3,7 +3,7 @@ package com.lawProject.SSL.global.oauth.handler;
 import com.lawProject.SSL.domain.token.exception.TokenException;
 import com.lawProject.SSL.domain.token.model.BlacklistedToken;
 import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.global.common.code.ErrorCode;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,7 @@ import java.io.IOException;
 public class OAuthLogoutHandler implements LogoutHandler, LogoutSuccessHandler {
     private final JwtUtil jwtUtil;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -33,8 +33,8 @@ public class OAuthLogoutHandler implements LogoutHandler, LogoutSuccessHandler {
             blacklistedTokenRepository.save(new BlacklistedToken(accessToken));
         }
 
-        String userId = jwtUtil.extractUserId(accessToken);
-        refreshTokenRepository.deleteByUserId(userId);
+        String username = jwtUtil.extractUsername(accessToken);
+        tokenRepository.deleteByUsername(username);
 
         log.info("User logged out and token invalidated");
     }

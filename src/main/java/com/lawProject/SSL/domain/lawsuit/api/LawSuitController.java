@@ -32,7 +32,7 @@ public class LawSuitController {
     private final FileService fileService;
 
     /* 소송장 다운로드 */
-    // TODO originalFileName으로 변경시 정상적으로 디코딩 안되는 문제 해결, 파일 이름 앞에 userId 등 식별자 추가
+    // TODO originalFileName으로 변경시 정상적으로 디코딩 안되는 문제 해결, 파일 이름 앞에 user 식별자 추가
     @GetMapping("/download/{storedFileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String storedFileName) {
         try {

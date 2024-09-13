@@ -1,40 +1,45 @@
 package com.lawProject.SSL.global.oauth.model;
 
-import com.lawProject.SSL.domain.user.model.User;
+import com.lawProject.SSL.global.oauth.dto.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 public class CustomOAuth2User implements OAuth2User {
-    private final User user;
-    private final Map<String, Object> attributes;
+    private final UserDTO userDTO;
 
-    public CustomOAuth2User(User user, Map<String, Object> attributes) {
-        this.user = user;
-        this.attributes = attributes;
+    public CustomOAuth2User(UserDTO userDTO) {
+        this.userDTO = userDTO;
     }
 
     @Override
     public Map<String, Object> getAttributes() {
-        return attributes;
+        return null; // Google, Naver, Kakao 마다 형식이 다르기 때문에 사용 x
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        Collection<GrantedAuthority> collection = new ArrayList<>();
+        collection.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return userDTO.getRole();
+            }
+        });
+
+        return collection;
     }
 
     @Override
     public String getName() {
-        return user.getName();
+        return userDTO.getName();
     }
 
-    public User getUser() {
-        return user;
+    public String getUsername() {
+        return userDTO.getUsername();
     }
 }
 

@@ -21,8 +21,8 @@ public class UserService {
         );
     }
 
-    public User findByUserId(String userId) {
-        return userRepository.findByUserId(userId).orElseThrow(
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(
                 () -> new UserException(ErrorCode.USER_NOT_FOUND)
         );
     }

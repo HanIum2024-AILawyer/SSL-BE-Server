@@ -1,68 +1,62 @@
 package com.lawProject.SSL.global.oauth.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lawProject.SSL.domain.token.model.RefreshToken;
-import com.lawProject.SSL.domain.token.repository.RefreshTokenRepository;
-import com.lawProject.SSL.domain.user.repository.UserRepository;
-import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
+public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Value("${jwt.redirect}")
     private String REDIRECT_URI; // 로그인 과정이 끝난 후 리다이렉트 되는 URI
+    @Value("${jwt.access-token.header}")
+    private String AccessTokenHeader;
 
-    @Value("${jwt.access-token.expiration-time}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
-
-    @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
-
-//    private final JwtUtil jwtUtil;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final ObjectMapper objectMapper;
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        User user = oAuth2User.getUser();
+        String username = oAuth2User.getUsername();
 
-        // Refresh Token 발급 후 저장
-        String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
-        RefreshToken newRefreshToken = RefreshToken.builder()
-                .userId(user.getUserId())
-                .token(refreshToken)
-                .build();
-        refreshTokenRepository.save(newRefreshToken);
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        GrantedAuthority auth = iterator.next();
+        String role = auth.getAuthority();
 
         // Access Token 발급
-        String accessToken = jwtUtil.createAccessToken(user.getUserId());
-
-        log.info("Refresh Token: {}", refreshToken);
+        String accessToken = jwtUtil.createAccessToken(username, role);
         log.info("Access Token: {}", accessToken);
+        // Refresh Token 발급 후 저장
+        jwtUtil.createRefreshToken(username, role, accessToken);
 
-        jwtUtil.sendAccessAndRefreshToken(response, accessToken, refreshToken);
-        // 토큰 정보를 포함한 리다이렉트 URL 생성
-        String redirectUrl = REDIRECT_URI + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
-        redirectStrategy.sendRedirect(request, response, redirectUrl);
+        response.addCookie(createCookie(AccessTokenHeader, accessToken));
+        response.sendRedirect(REDIRECT_URI);
+    }
+
+    /* 프론트엔드 서버로 JWT를 전달할 때 Cookie 방식 사용 */
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(60*60*60);
+        //cookie.setSecure(true); // https 보안 설정
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 }
