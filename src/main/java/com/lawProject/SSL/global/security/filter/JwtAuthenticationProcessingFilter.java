@@ -46,7 +46,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
         System.out.println("Received request URI: " + requestURI);
-        if (requestURI.equals(NO_CHECK_URL) || request.getHeader(AUTHORIZATION).isEmpty()) {
+        if (requestURI.equals(NO_CHECK_URL) || (request.getHeader(AUTHORIZATION) == null)) {
             filterChain.doFilter(request, response);
             return;
         }
