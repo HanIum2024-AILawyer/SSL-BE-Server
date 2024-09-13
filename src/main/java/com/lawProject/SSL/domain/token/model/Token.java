@@ -12,7 +12,7 @@ import lombok.*;
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "refresh_tokens_id")
+    @Column(name = "token_id")
     private Long id;
 
     @Column(name = "username", unique = true)
