@@ -64,11 +64,12 @@ public class JwtUtilImpl implements JwtUtil {
     }
 
     @Override
-    public void createRefreshToken(String username, String accessToken) {
+    public void createRefreshToken(String username, String role,String accessToken) {
         String refreshToken = JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenValidityInSeconds))
                 .withClaim(USERNAME_CLAIM, username)
+                .withClaim(ROLE_CLAIM, role)
                 .sign(Algorithm.HMAC512(secret));
 
         tokenService.saveOrUpdate(username, refreshToken, accessToken);
@@ -82,7 +83,7 @@ public class JwtUtilImpl implements JwtUtil {
             String refreshToken = token.getRefreshToken();
 
             if (isTokenValid(refreshToken)) {
-                String reissueAccessToken = createAccessToken(extractUsername(refreshToken));
+                String reissueAccessToken = createAccessToken(extractUsername(refreshToken), extractRole(refreshToken));
                 tokenService.updateAccessToken(reissueAccessToken, token);
                 return reissueAccessToken;
             }
@@ -119,13 +120,6 @@ public class JwtUtilImpl implements JwtUtil {
         return Optional.ofNullable(request.getHeader(accessHeader)).filter(
                 accessToken -> accessToken.startsWith(BEARER) //토큰이 Bearer로 시작하는지 확인
         ).map(accessToken -> accessToken.substring(BEARER.length()).trim()); // Bearer 접두사 제거 후 공백 제거
-    }
-
-    @Override
-    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(refreshHeader)).filter(
-                refreshToken -> refreshToken.startsWith(BEARER)
-        ).map(refreshToken -> refreshToken.substring(BEARER.length()).trim()); // Bearer 접두사 제거 후 공백 제거
     }
 
     @Override

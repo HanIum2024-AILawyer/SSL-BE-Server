@@ -43,7 +43,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String accessToken = jwtUtil.createAccessToken(username, role);
         log.info("Access Token: {}", accessToken);
         // Refresh Token 발급 후 저장
-        jwtUtil.createRefreshToken(username, accessToken);
+        jwtUtil.createRefreshToken(username, role, accessToken);
 
         response.addCookie(createCookie(AccessTokenHeader, accessToken));
         response.sendRedirect(REDIRECT_URI);
