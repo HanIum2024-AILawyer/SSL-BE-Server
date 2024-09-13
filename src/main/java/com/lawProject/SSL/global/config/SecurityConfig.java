@@ -9,6 +9,7 @@ import com.lawProject.SSL.global.oauth.service.CustomOAuth2UserService;
 import com.lawProject.SSL.global.security.filter.JwtAuthenticationProcessingFilter;
 import com.lawProject.SSL.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +39,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuthLogoutHandler oAuthLogoutHandler;
 
+    @Value("${security.origins}")
+    private String allowedOrigins;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -46,7 +50,15 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // CORS 설정 추가
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
+                        oauth
+                                .userInfoEndpoint(end -> end.userService(customOAuth2UserService))
+                                .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
+                                .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/error", "/error/**", "/stomp/**", "/redis/**").permitAll() // 정적 자원 설정
                         .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/reissue/access-token", "/auth/success").permitAll()
@@ -55,12 +67,8 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
-                        oauth
-                                .userInfoEndpoint(end -> end.userService(customOAuth2UserService))
-                                .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
-                                .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .logout(logout ->
                         logout
                                 .logoutUrl("/logout")
@@ -68,8 +76,7 @@ public class SecurityConfig {
                                 .logoutSuccessHandler(oAuthLogoutHandler)
                                 .logoutSuccessUrl("/login")
                                 .invalidateHttpSession(true)
-                )
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+                );
 
         return httpSecurity.build();
     }
@@ -87,13 +94,18 @@ public class SecurityConfig {
     private CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setAllowedHeaders(Collections.singletonList(allowedOrigins));
             config.setAllowedMethods(Collections.singletonList("*"));
             config.setAllowedOriginPatterns(Collections.singletonList("*"));
             config.setAllowCredentials(true);
             config.setAllowedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "Cache-Control", "Content-Type"));
+            config.setMaxAge(3600L);
+
             /* 응답 헤더 설정 추가*/
-            config.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
+            config.setExposedHeaders(Collections.singletonList("Authorization"));
+            config.setExposedHeaders(Collections.singletonList("Authorization-refresh"));
+            config.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+
             return config;
         };
     }
