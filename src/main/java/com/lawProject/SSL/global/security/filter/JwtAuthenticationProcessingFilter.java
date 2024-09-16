@@ -1,22 +1,20 @@
 package com.lawProject.SSL.global.security.filter;
 
-import com.lawProject.SSL.domain.user.repository.UserRepository;
+import com.lawProject.SSL.domain.token.model.Token;
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.global.oauth.dto.UserDTO;
 import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -28,81 +26,108 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    @Value("${jwt.access-token.header}")
-    private String AUTHORIZATION;
 
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final TokenRepository tokenRepository;
 
     private static final String NO_CHECK_URL = "/login";
 
-    /**
-     * 1. RefreshToken이 오는 경우 -> 유효하면 AccessToken 재발급후, 필터 진행 X
-     * 2. RefreshToken은 없고 AccessToken만 있는 경우 -> 유저정보 저장 후 필터 진행, RefreshToken 재발급X
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-        System.out.println("Received request URI: " + requestURI);
-        if (requestURI.equals(NO_CHECK_URL) || (request.getHeader(AUTHORIZATION) == null)) {
+        if (isExemptUrl(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        checkAccessTokenAndAuthentication(request, response, filterChain);
-    }
+        Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
 
-    /**
-     * request 헤더에서 accessToken을 가져온 뒤 유효한지 검증한다.
-     * 유효하다면 인증 객체를 생성하고 요청을 다음 필터로 보낸다.
-     * 유효하지 않다면 accessToken을 재발급하고, 재발급 된 accessToken을 헤더에 실어 다음 필터로 보낸다.
-     */
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
-            String accessToken = accessTokenOpt.orElse("");
+        if (accessTokenOpt.isEmpty()) {
+            proceedWithoutAuthentication(response, filterChain, request);
+            return;
+        }
 
-            if (StringUtils.hasText(accessToken)) {
-                if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 유효하다면
-                    String username = jwtUtil.extractUsername(accessToken);
-                    String role = jwtUtil.extractRole(accessToken);
-                    UserDTO userDTO = new UserDTO(username, role);
+        String accessToken = accessTokenOpt.get();
 
-                    //UserDetails에 회원 정보 객체 담기
-                    CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
-                    saveAuthentication(customOAuth2User);
-                } else { // 토큰이 만료되었다면
-                    String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
-
-                    if (StringUtils.hasText(reissueAccessToken)) {
-                        String username = jwtUtil.extractUsername(reissueAccessToken);
-                        String role = jwtUtil.extractRole(reissueAccessToken);
-                        UserDTO userDTO = new UserDTO(username, role);
-
-                        //UserDetails에 회원 정보 객체 담기
-                        CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
-                        saveAuthentication(customOAuth2User);
-
-                        response.setHeader(AUTHORIZATION, reissueAccessToken);
-                    }
-                }
-            }
-
+        if (!jwtUtil.isTokenValid(accessToken)) {
+            handleExpiredAccessToken(request, response, filterChain, accessToken);
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            // 예외를 로깅하고, 적절한 응답을 설정합니다.
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Token error");
+            return;
+        } else {
+            authenticateUser(accessToken);
+            filterChain.doFilter(request, response);
         }
     }
 
+    // 특정 URL에 대한 토큰 체크 면제
+    private boolean isExemptUrl(String requestURI) {
+        return NO_CHECK_URL.equals(requestURI);
+    }
+
+    // AccessToken이 없는 경우
+    private void proceedWithoutAuthentication(HttpServletResponse response, FilterChain filterChain, HttpServletRequest request) throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        filterChain.doFilter(request, response);
+    }
+
+    // 만료된 AccessToken 처리
+    private void handleExpiredAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain, String accessToken) throws IOException, ServletException {
+        Optional<Token> tokenOpt = tokenRepository.findByAccessToken(accessToken);
+
+        if (tokenOpt.isEmpty() || !jwtUtil.isTokenValid(tokenOpt.get().getRefreshToken())) {
+            setUnauthorized(response);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        Token token = tokenOpt.get();
+        String refreshToken = token.getRefreshToken();
+        String newAccessToken = generateNewAccessToken(refreshToken);
+
+        updateTokenAndAddCookie(response, token, newAccessToken);
+        authenticateUser(newAccessToken);
+    }
+
+    // 새 AccessToken 생성
+    private String generateNewAccessToken(String refreshToken) {
+        String username = jwtUtil.extractUsername(refreshToken);
+        String role = jwtUtil.extractRole(refreshToken);
+        return jwtUtil.createAccessToken(username, role);
+    }
+
+    // AccessToken 갱신 및 저장
+    private void updateTokenAndAddCookie(HttpServletResponse response, Token token, String newAccessToken) {
+        token.updateAccessToken(newAccessToken);
+        tokenRepository.save(token);
+        response.addCookie(createCookie("Authorization", newAccessToken));
+    }
+
+    // 유효한 AccessToken일 경우 인증 처리
+    private void authenticateUser(String accessToken) {
+        String username = jwtUtil.extractUsername(accessToken);
+        String role = jwtUtil.extractRole(accessToken);
+        UserDTO userDTO = new UserDTO(username, role);
+
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
+        saveAuthentication(customOAuth2User);
+    }
+
+    // 스프링 시큐리티 인증 저장
     private void saveAuthentication(CustomOAuth2User customOAuth2User) {
-
-        // Spring Security 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-
-        // 세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
+
+    // 쿠키 생성
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(60 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
+    }
+
+    // 인증 실패 처리
+    private void setUnauthorized(HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }
