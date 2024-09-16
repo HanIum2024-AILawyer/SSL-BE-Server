@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.lawProject.SSL.domain.token.exception.TokenException;
 import com.lawProject.SSL.domain.token.model.Token;
 import com.lawProject.SSL.domain.token.repository.BlacklistedTokenRepository;
-import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.domain.token.service.TokenService;
 import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
@@ -51,7 +50,6 @@ public class JwtUtilImpl implements JwtUtil {
 
     private final UserRepository userRepository;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
-    private final TokenRepository tokenRepository;
     private final TokenService tokenService;
 
     @Override
@@ -128,9 +126,7 @@ public class JwtUtilImpl implements JwtUtil {
             }
         }
 
-        return Optional.ofNullable(token).filter(
-                accessToken -> accessToken.startsWith(BEARER) //토큰이 Bearer로 시작하는지 확인
-        ).map(accessToken -> accessToken.substring(BEARER.length()).trim()); // Bearer 접두사 제거 후 공백 제거
+        return Optional.ofNullable(token);
     }
 
     @Override
