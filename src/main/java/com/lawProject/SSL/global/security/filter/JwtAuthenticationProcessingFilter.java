@@ -6,6 +6,7 @@ import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * OncePerRequestFilter: 모든 서블릿 컨테이너에서 요청 디스패치당 단일 실행을 보장하는 것을 목표로 하는 필터 기본 클래스
@@ -44,14 +44,25 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        // Cookie들을 불러온뒤 토큰이 들어있는 쿠키를 찾아 토큰 값 추출
+        String token = null;
+        Cookie[] cookies = request.getCookies();
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(AUTHORIZATION)) {
+                token = cookie.getValue();
+            }
+        }
+
+        // 토큰 값 검증
         String requestURI = request.getRequestURI();
-        System.out.println("Received request URI: " + requestURI);
-        if (requestURI.equals(NO_CHECK_URL) || (request.getHeader(AUTHORIZATION) == null)) {
+        if (requestURI.equals(NO_CHECK_URL) || token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        checkAccessTokenAndAuthentication(request, response, filterChain);
+        checkAccessTokenAndAuthentication(request, response, token, filterChain);
     }
 
     /**
@@ -59,22 +70,20 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      * 유효하다면 인증 객체를 생성하고 요청을 다음 필터로 보낸다.
      * 유효하지 않다면 accessToken을 재발급하고, 재발급 된 accessToken을 헤더에 실어 다음 필터로 보낸다.
      */
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, String token, FilterChain filterChain) throws ServletException, IOException {
         try {
-            Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
-            String accessToken = accessTokenOpt.orElse("");
 
-            if (StringUtils.hasText(accessToken)) {
-                if (jwtUtil.isTokenValid(accessToken)) { // 토큰이 유효하다면
-                    String username = jwtUtil.extractUsername(accessToken);
-                    String role = jwtUtil.extractRole(accessToken);
+            if (StringUtils.hasText(token)) {
+                if (jwtUtil.isTokenValid(token)) { // 토큰이 유효하다면
+                    String username = jwtUtil.extractUsername(token);
+                    String role = jwtUtil.extractRole(token);
                     UserDTO userDTO = new UserDTO(username, role);
 
                     //UserDetails에 회원 정보 객체 담기
                     CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
                     saveAuthentication(customOAuth2User);
                 } else { // 토큰이 만료되었다면
-                    String reissueAccessToken = jwtUtil.reissueAccessToken(accessToken);
+                    String reissueAccessToken = jwtUtil.reissueAccessToken(token);
 
                     if (StringUtils.hasText(reissueAccessToken)) {
                         String username = jwtUtil.extractUsername(reissueAccessToken);
