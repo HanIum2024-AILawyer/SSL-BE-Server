@@ -1,12 +1,10 @@
 package com.lawProject.SSL.global.security.filter;
 
-import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.oauth.dto.UserDTO;
 import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * OncePerRequestFilter: 모든 서블릿 컨테이너에서 요청 디스패치당 단일 실행을 보장하는 것을 목표로 하는 필터 기본 클래스
@@ -32,9 +29,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private String AUTHORIZATION;
 
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     private static final String NO_CHECK_URL = "/login";
 
@@ -46,21 +40,16 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // Cookie들을 불러온뒤 토큰이 들어있는 쿠키를 찾아 토큰 값 추출
-        String token = null;
-        Cookie[] cookies = request.getCookies();
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(AUTHORIZATION)) {
-                token = cookie.getValue();
-            }
-        }
+        Optional<String> tokenOpt = jwtUtil.extractAccessToken(request);
 
         // 토큰 값 검증
         String requestURI = request.getRequestURI();
-        if (requestURI.equals(NO_CHECK_URL) || token == null) {
+        if (requestURI.equals(NO_CHECK_URL) || tokenOpt.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
+
+        String token = tokenOpt.get();
 
         checkAccessTokenAndAuthentication(request, response, token, filterChain);
     }

@@ -11,6 +11,7 @@ import com.lawProject.SSL.domain.user.exception.UserException;
 import com.lawProject.SSL.domain.user.model.User;
 import com.lawProject.SSL.domain.user.repository.UserRepository;
 import com.lawProject.SSL.global.common.code.ErrorCode;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -117,7 +118,17 @@ public class JwtUtilImpl implements JwtUtil {
     /*토큰 추출*/
     @Override
     public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(accessHeader)).filter(
+
+        String token = null;
+        Cookie[] cookies = request.getCookies();
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(accessHeader)) {
+                token = cookie.getValue();
+            }
+        }
+
+        return Optional.ofNullable(token).filter(
                 accessToken -> accessToken.startsWith(BEARER) //토큰이 Bearer로 시작하는지 확인
         ).map(accessToken -> accessToken.substring(BEARER.length()).trim()); // Bearer 접두사 제거 후 공백 제거
     }
