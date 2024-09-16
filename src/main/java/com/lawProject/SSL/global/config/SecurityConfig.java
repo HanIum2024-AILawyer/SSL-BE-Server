@@ -1,5 +1,6 @@
 package com.lawProject.SSL.global.config;
 
+import com.lawProject.SSL.domain.token.repository.TokenRepository;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginFailureHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLoginSuccessHandler;
 import com.lawProject.SSL.global.oauth.handler.OAuthLogoutHandler;
@@ -30,6 +31,7 @@ import java.util.Collections;
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtUtil jwtService;
+    private final TokenRepository tokenRepository;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -79,7 +81,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter(){
 
-        return new JwtAuthenticationProcessingFilter(jwtService);
+        return new JwtAuthenticationProcessingFilter(jwtService, tokenRepository);
     }
 
     @Bean
