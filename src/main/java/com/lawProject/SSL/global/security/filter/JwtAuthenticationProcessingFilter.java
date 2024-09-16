@@ -50,11 +50,12 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         if (!jwtUtil.isTokenValid(accessToken)) {
             handleExpiredAccessToken(request, response, filterChain, accessToken);
+            filterChain.doFilter(request, response);
             return;
+        } else {
+            authenticateUser(accessToken);
+            filterChain.doFilter(request, response);
         }
-
-        authenticateUser(accessToken);
-        filterChain.doFilter(request, response);
     }
 
     // 특정 URL에 대한 토큰 체크 면제
