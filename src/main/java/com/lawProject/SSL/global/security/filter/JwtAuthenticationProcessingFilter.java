@@ -41,9 +41,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("request URl1: {}", request.getRequestURI());
+        log.info("request URl: {}", request.getRequestURI());
         if (isExemptUrl(request.getRequestURI())|| request.getRequestURI().equals("/")) {
-            log.info("request URl2: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,6 +50,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
 
         if (accessTokenOpt.isEmpty()) {
+            setUnauthorized(response);
             filterChain.doFilter(request, response);
             return;
         }
@@ -75,19 +75,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         });
         return isExempt;
     }
-    // AccessToken이 없는 경우
-    private void proceedWithoutAuthentication(HttpServletResponse response, FilterChain filterChain, HttpServletRequest request) throws IOException, ServletException {
-//        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        filterChain.doFilter(request, response);
-    }
 
     // 만료된 AccessToken 처리
     private void handleExpiredAccessToken(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain, String accessToken) throws IOException, ServletException {
         Optional<Token> tokenOpt = tokenRepository.findByAccessToken(accessToken);
 
         if (tokenOpt.isEmpty() || !jwtUtil.isTokenValid(tokenOpt.get().getRefreshToken())) {
-//            setUnauthorized(response);
-            filterChain.doFilter(request, response);
+            setUnauthorized(response);
             return;
         }
 
@@ -110,7 +104,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private void updateTokenAndAddCookie(HttpServletResponse response, Token token, String newAccessToken) {
         token.updateAccessToken(newAccessToken);
         tokenRepository.save(token);
-//        response.addHeader("Set-Cookie" ,createCookie(AccessTokenHeader, newAccessToken));
         response.addCookie(createCookie(AccessTokenHeader, newAccessToken));
     }
 
@@ -132,23 +125,11 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     /* 프론트엔드 서버로 JWT를 전달할 때 Cookie 방식 사용 */
     private Cookie createCookie(String key, String value) {
-
-//        ResponseCookie cookie = ResponseCookie.from(key, value)
-//                .path("/")
-//                .sameSite("None")
-//                .httpOnly(true)
-//                .domain(DOMAIN)
-//                .secure(true)
-//                .maxAge(Duration.ofHours(1))
-//                .build();
-
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(60 * 60 * 60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
-
-//        return cookie.toString();
     }
 
     // 인증 실패 처리
