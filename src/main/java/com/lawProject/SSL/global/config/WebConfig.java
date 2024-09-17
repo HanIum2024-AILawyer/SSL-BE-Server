@@ -27,8 +27,11 @@ public class WebConfig implements WebMvcConfigurer{
 
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
-        corsRegistry.addMapping("/**")
+        corsRegistry
+                .addMapping("/**")
                 .exposedHeaders("Set-Cookie")
-                .allowedOrigins(allowedOrigins, "http://localhost:3000");
+                .allowCredentials(true)
+                .allowedOrigins("http://localhost:3000", "http://sslaw.shop", "https://sslaw.shop", "http://localhost:8080");
     }
+
 }

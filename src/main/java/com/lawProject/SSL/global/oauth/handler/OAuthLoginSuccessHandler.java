@@ -3,18 +3,19 @@ package com.lawProject.SSL.global.oauth.handler;
 import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -26,6 +27,8 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private String REDIRECT_URI; // 로그인 과정이 끝난 후 리다이렉트 되는 URI
     @Value("${jwt.access-token.header}")
     private String AccessTokenHeader;
+    @Value("${jwt.domain}")
+    private String DOMAIN;
 
     private final JwtUtil jwtUtil;
 
@@ -45,18 +48,22 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         // Refresh Token 발급 후 저장
         jwtUtil.createRefreshToken(username, role, accessToken);
 
-        response.addCookie(createCookie(AccessTokenHeader, accessToken));
+        response.addHeader("Set-Cookie" ,createCookie(AccessTokenHeader, accessToken));
         response.sendRedirect(REDIRECT_URI);
     }
 
     /* 프론트엔드 서버로 JWT를 전달할 때 Cookie 방식 사용 */
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60*60*60);
-        //cookie.setSecure(true); // https 보안 설정
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
+    private String createCookie(String key, String value) {
 
-        return cookie;
+        ResponseCookie cookie = ResponseCookie.from(key, value)
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .domain(DOMAIN)
+                .secure(true)
+                .maxAge(Duration.ofHours(1))
+                .build();
+
+        return cookie.toString();
     }
 }

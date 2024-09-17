@@ -12,12 +12,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +29,10 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
+    @Value("${jwt.access-token.header}")
+    private String AccessTokenHeader;
+    @Value("${jwt.domain}")
+    private String DOMAIN;
 
     private final JwtUtil jwtUtil;
     private final TokenRepository tokenRepository;
@@ -34,7 +41,9 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (isExemptUrl(request.getRequestURI())) {
+        log.info("request URl1: {}", request.getRequestURI());
+        if (isExemptUrl(request.getRequestURI())|| request.getRequestURI().equals("/")) {
+            log.info("request URl2: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
@@ -42,7 +51,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
 
         if (accessTokenOpt.isEmpty()) {
-            proceedWithoutAuthentication(response, filterChain, request);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -51,7 +60,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         if (!jwtUtil.isTokenValid(accessToken)) {
             handleExpiredAccessToken(request, response, filterChain, accessToken);
             filterChain.doFilter(request, response);
-            return;
         } else {
             authenticateUser(accessToken);
             filterChain.doFilter(request, response);
@@ -60,12 +68,16 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     // 특정 URL에 대한 토큰 체크 면제
     private boolean isExemptUrl(String requestURI) {
-        return NO_CHECK_URL.equals(requestURI);
+        List<String> exemptUrls = exemptUrls();
+        boolean isExempt = exemptUrls.stream().anyMatch(url -> {
+            boolean matches = requestURI.startsWith(url);
+            return matches;
+        });
+        return isExempt;
     }
-
     // AccessToken이 없는 경우
     private void proceedWithoutAuthentication(HttpServletResponse response, FilterChain filterChain, HttpServletRequest request) throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         filterChain.doFilter(request, response);
     }
 
@@ -74,7 +86,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<Token> tokenOpt = tokenRepository.findByAccessToken(accessToken);
 
         if (tokenOpt.isEmpty() || !jwtUtil.isTokenValid(tokenOpt.get().getRefreshToken())) {
-            setUnauthorized(response);
+//            setUnauthorized(response);
             filterChain.doFilter(request, response);
             return;
         }
@@ -98,7 +110,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private void updateTokenAndAddCookie(HttpServletResponse response, Token token, String newAccessToken) {
         token.updateAccessToken(newAccessToken);
         tokenRepository.save(token);
-        response.addCookie(createCookie("Authorization", newAccessToken));
+//        response.addHeader("Set-Cookie" ,createCookie(AccessTokenHeader, newAccessToken));
+        response.addCookie(createCookie(AccessTokenHeader, newAccessToken));
     }
 
     // 유효한 AccessToken일 경우 인증 처리
@@ -117,17 +130,51 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    // 쿠키 생성
+    /* 프론트엔드 서버로 JWT를 전달할 때 Cookie 방식 사용 */
     private Cookie createCookie(String key, String value) {
+
+//        ResponseCookie cookie = ResponseCookie.from(key, value)
+//                .path("/")
+//                .sameSite("None")
+//                .httpOnly(true)
+//                .domain(DOMAIN)
+//                .secure(true)
+//                .maxAge(Duration.ofHours(1))
+//                .build();
+
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(60 * 60 * 60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
+
+//        return cookie.toString();
     }
 
     // 인증 실패 처리
     private void setUnauthorized(HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    private List<String> exemptUrls() {
+        return Arrays.asList(
+                "/css/**",         // CSS 파일들
+                "/images/**",      // 이미지 파일들
+                "/js/**",          // 자바스크립트 파일들
+                "/favicon.*",      // 파비콘 파일
+                "/*/icon-*",       // 아이콘 파일
+                "/error",          // 에러 페이지
+                "/error/**",       // 에러 관련 경로
+                "/stomp/**",       // STOMP 관련 경로
+                "/redis/**",       // Redis 관련 경로
+                "/join",           // 회원가입 경로
+                "/login",       // 로그인 관련 경로
+                "/info",           // 정보 관련 경로
+                "/info/**",        // 정보 관련 하위 경로
+                "/api/v1/inquery/**",
+                "/api/v1/lawyers",
+                "/api/v1/lawyers/**",
+                "/healthcheck"
+        );
     }
 }

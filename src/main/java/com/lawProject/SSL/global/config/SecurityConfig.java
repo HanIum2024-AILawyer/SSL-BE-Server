@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/error", "/error/**", "/stomp/**", "/redis/**").permitAll() // 정적 자원 설정
-                        .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/reissue/access-token", "/auth/success").permitAll()
+                        .requestMatchers("/", "/join", "/login/**", "/info", "/info/**", "/healthcheck").permitAll()
                         .requestMatchers("/api/v1/inquery/my").authenticated()
                         .requestMatchers("/api/v1/inquery/**", "/api/v1/lawyers", "/api/v1/lawyers/**").permitAll()
                         .requestMatchers("/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
