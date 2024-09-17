@@ -15,4 +15,9 @@ public class HomeController {
     public String home() {
         return "home - 로그인 필요";
     }
+
+    @GetMapping("/healthcheck")
+    public String healthcheck() {
+        return "OK";
+    }
 }
