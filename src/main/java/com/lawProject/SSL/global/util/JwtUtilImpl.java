@@ -119,10 +119,13 @@ public class JwtUtilImpl implements JwtUtil {
 
         String token = null;
         Cookie[] cookies = request.getCookies();
-
+        if (cookies == null) {
+            return Optional.empty();
+        }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(accessHeader)) {
                 token = cookie.getValue();
+                break;
             }
         }
 
