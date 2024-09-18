@@ -7,12 +7,12 @@ import com.lawProject.SSL.global.oauth.model.CustomOAuth2User;
 import com.lawProject.SSL.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,7 +51,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         if (accessTokenOpt.isEmpty()) {
             setUnauthorized(response);
-            filterChain.doFilter(request, response);
             return;
         }
 
@@ -59,7 +58,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         if (!jwtUtil.isTokenValid(accessToken)) {
             handleExpiredAccessToken(request, response, filterChain, accessToken);
-            filterChain.doFilter(request, response);
         } else {
             authenticateUser(accessToken);
             filterChain.doFilter(request, response);
@@ -91,6 +89,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         updateTokenAndAddCookie(response, token, newAccessToken);
         authenticateUser(newAccessToken);
+        filterChain.doFilter(request, response);
     }
 
     // 새 AccessToken 생성
@@ -104,7 +103,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private void updateTokenAndAddCookie(HttpServletResponse response, Token token, String newAccessToken) {
         token.updateAccessToken(newAccessToken);
         tokenRepository.save(token);
-        response.addCookie(createCookie(AccessTokenHeader, newAccessToken));
+        response.setHeader("Set-Cookie", createCookie(AccessTokenHeader, newAccessToken));
     }
 
     // 유효한 AccessToken일 경우 인증 처리
@@ -124,12 +123,18 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     /* 프론트엔드 서버로 JWT를 전달할 때 Cookie 방식 사용 */
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+    private String createCookie(String key, String value) {
+
+        ResponseCookie cookie = ResponseCookie.from(key, value)
+                .path("/")
+                .sameSite("None")
+                .httpOnly(true)
+                .domain("localhost:3000")
+                .secure(true)
+//                .maxAge(Duration.ofHours(1))
+                .build();
+
+        return cookie.toString();
     }
 
     // 인증 실패 처리

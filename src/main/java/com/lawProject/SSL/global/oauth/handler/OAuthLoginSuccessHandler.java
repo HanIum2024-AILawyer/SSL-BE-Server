@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -61,7 +60,6 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
                 .httpOnly(true)
                 .domain(DOMAIN)
                 .secure(true)
-                .maxAge(Duration.ofHours(1))
                 .build();
 
         return cookie.toString();
