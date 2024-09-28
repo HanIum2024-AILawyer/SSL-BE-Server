@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.token.model;
 
+import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @Builder
 @Getter
 @Table(name = "tokens")
-public class Token {
+public class Token extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "token_id")

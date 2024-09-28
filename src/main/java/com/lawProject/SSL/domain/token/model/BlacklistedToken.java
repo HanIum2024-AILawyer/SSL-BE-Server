@@ -1,5 +1,6 @@
 package com.lawProject.SSL.domain.token.model;
 
+import com.lawProject.SSL.global.common.dao.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlacklistedToken {
+public class BlacklistedToken extends BaseEntity {
     @Id
     @Column(name = "token", nullable = false, length = 500)
     private String token;
