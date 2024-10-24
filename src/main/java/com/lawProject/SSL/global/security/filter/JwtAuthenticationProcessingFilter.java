@@ -42,7 +42,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("request URl: {}", request.getRequestURI());
-        if (isExemptUrl(request.getRequestURI())|| request.getRequestURI().equals("/")) {
+        if (request.getRequestURI().equals("/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,7 +50,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         Optional<String> accessTokenOpt = jwtUtil.extractAccessToken(request);
 
         if (accessTokenOpt.isEmpty()) {
-            setUnauthorized(response);
+            filterChain.doFilter(request, response);
             return;
         }
 

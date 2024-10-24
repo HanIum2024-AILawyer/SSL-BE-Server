@@ -29,9 +29,9 @@ public class OAuthLogoutHandler implements LogoutHandler, LogoutSuccessHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String accessToken = jwtUtil.extractAccessToken(request).orElseThrow(() -> new TokenException(ErrorCode.ACCESS_TOKEN_NOT_FOUND));
-        if (!blacklistedTokenRepository.existsByToken(accessToken)) {
-            blacklistedTokenRepository.save(new BlacklistedToken(accessToken));
-        }
+//        if (!blacklistedTokenRepository.existsByToken(accessToken)) {
+//            blacklistedTokenRepository.save(new BlacklistedToken(accessToken));
+//        }
 
         String username = jwtUtil.extractUsername(accessToken);
         tokenRepository.deleteByUsername(username);

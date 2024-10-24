@@ -68,7 +68,7 @@ public class TokenService {
     public void deleteToken() {
         LocalDateTime date7 = LocalDateTime.now().minusDays(7);
         tokenRepository.deleteByCreatedAt(date7);
-        LocalDateTime date1 = LocalDateTime.now().minusHours(1);
-        blacklistedTokenRepository.deleteByCreatedAt(date1);
+//        LocalDateTime date1 = LocalDateTime.now().minusHours(1);
+//        blacklistedTokenRepository.deleteByCreatedAt(date1);
     }
 }

@@ -173,10 +173,10 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public boolean isTokenValid(String token) {
         try {
-            if (blacklistedTokenRepository.existsByToken(token)) {
-                log.error("Token is blacklisted");
-                return false;
-            }
+//            if (blacklistedTokenRepository.existsByToken(token)) {
+//                log.error("Token is blacklisted");
+//                return false;
+//            }
             JWT.require(Algorithm.HMAC512(secret)).build().verify(token);
             return true;
         } catch (Exception e) {
