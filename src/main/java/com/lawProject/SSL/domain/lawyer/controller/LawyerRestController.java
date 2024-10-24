@@ -6,6 +6,7 @@ import com.lawProject.SSL.global.common.code.SuccessCode;
 import com.lawProject.SSL.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,7 @@ public class LawyerRestController {
     /* 변호사 등록, Admin */
     @PostMapping("/admin/lawyers")
     public ResponseEntity<ApiResponse<Object>> createLawyer(@RequestPart(name = "request") LawyerCreateRequest request,
-                                                            @RequestPart(name = "image") MultipartFile image
+                                                            @RequestPart(name = "image") @Nullable MultipartFile image
                                                             ) throws IOException {
         lawyerService.create(request, image);
 
@@ -66,7 +67,7 @@ public class LawyerRestController {
     public ResponseEntity<ApiResponse<Object>> ModifyLawyer(
             @PathVariable Long lawyerId,
             @RequestPart(name = "request") LawyerCreateRequest request,
-            @RequestPart(name = "image", required = false) MultipartFile image) {
+            @RequestPart(name = "image", required = false) @Nullable MultipartFile image) {
 
         lawyerService.modifyLawyer(lawyerId, request, image);
 
