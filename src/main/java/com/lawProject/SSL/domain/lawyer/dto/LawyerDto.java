@@ -40,11 +40,12 @@ public class LawyerDto {
             String imageName
     ) {
         public static LawyerListResponse of(Lawyer lawyer) {
+            String imageName = lawyer.getImage() != null ? lawyer.getImage().getImageName() : null;
             return LawyerListResponse.builder()
                     .id(lawyer.getId())
                     .name(lawyer.getName())
                     .tagName(lawyer.getHashTag().getTagName())
-                    .imageName(lawyer.getImage().getImageName())
+                    .imageName(imageName)
                     .build();
         }
     }
@@ -63,6 +64,7 @@ public class LawyerDto {
             String imageName // 이미지 이름
     ) {
         public static LawyerDetailResponse of(Lawyer lawyer) {
+            String imageName = lawyer.getImage() != null ? lawyer.getImage().getImageName() : null;
             return LawyerDetailResponse.builder()
                     .id(lawyer.getId())
                     .name(lawyer.getName())
@@ -73,7 +75,7 @@ public class LawyerDto {
                     .faxNumber(lawyer.getContactInfo().getFaxNumber())
                     .emailAddress(lawyer.getContactInfo().getEmailAddress())
                     .tagName(lawyer.getHashTag().getTagName())
-                    .imageName(lawyer.getImage().getImageName())
+                    .imageName(imageName)
                     .build();
         }
     }
