@@ -147,7 +147,8 @@ fix: 사용자 정보 누락 버그 해결
     - [[시행착오] 외부 API 통신시 RestTemplate를 사용하지 않고 WebClient를 사용한 이유](https://velog.io/@pp8817/시행착오-외부-API-통신시-RestTemplate를-사용하지-않고-WebClient를-사용한-이유)
 - 서버 배포시 Cookie 전송 문제 해결 With SameSite
     - [[시행착오] 서버 배포 시 Cookie 통신이 안되는 문제 With SameSite](https://velog.io/@pp8817/Cookie-SameSite-문제해결)
-
+- Spring WebFlux를 사용한 비동기 처리
+    - [✏️ [Java] Spring WebFlux - 비동기 처리 이해하기](https://velog.io/@pp8817/Java-Spring-WebFlux-비동기-처리-이해하기)
 - AWS로 배포하기
     - [[시행착오] AWS 프리티어 비용 과금 이슈, 해결 방법](https://velog.io/@pp8817/Project-AWS-프리티어-비용-과금-이슈-해결-방법)
 
