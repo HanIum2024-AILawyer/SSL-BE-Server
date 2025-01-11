@@ -34,6 +34,7 @@
 |:---:|:---:|
 | ![](https://github.com/pp8817.png?size=180) | ![]() |
 |[박상민](https://github.com/pp8817)|[윤영진](https://github.com/0-Jhin)|
+|소셜 회원가입/로그인 API<br>외부 API 연동 AI 법률 상담 API<br>외부 API 연동 서류 첨삭/생성 API<br>문의/건의 API|변호사 CURD API|
 
 ## 3. 💡 주요 기능
 - OAuth 2.0을 이용한 소셜 로그인 기능
